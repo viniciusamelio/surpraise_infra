@@ -1,6 +1,6 @@
 version: '3.7'
 services:
-  mongodb_container:
+  mongo:
     image: prismagraphql/mongo-single-replica:4.4.3-bionic
     ports:
       - 27017:27017
