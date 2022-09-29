@@ -81,18 +81,17 @@ class MongoDatasource implements DatabaseDatasource {
   save(SaveQuery query) async {
     try {
       if (query.id != null) {
-        final updateResult =
-            await _mongo.db.collection(query.sourceName).update(
-                  MongoFilterMapper.buildFrom(
-                    GetQuery(
-                      sourceName: query.sourceName,
-                      operator: FilterOperator.equalsTo,
-                      value: query.id,
-                      fieldName: "id",
-                    ),
-                  ),
-                  query.value,
-                );
+        await _mongo.db.collection(query.sourceName).update(
+              MongoFilterMapper.buildFrom(
+                GetQuery(
+                  sourceName: query.sourceName,
+                  operator: FilterOperator.equalsTo,
+                  value: query.id,
+                  fieldName: "id",
+                ),
+              ),
+              query.value,
+            );
         return QueryResult(
           success: true,
           failure: false,
