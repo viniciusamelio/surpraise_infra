@@ -19,7 +19,7 @@ void main() {
       id: faker.guid.guid(),
     );
 
-    setUp(() async {
+    setUpAll(() async {
       db = await Db.create("mongodb://127.0.0.1:27017/surpraise");
       await db.open();
       sut = UserRepository(
@@ -27,6 +27,10 @@ void main() {
           Mongo(db),
         ),
       );
+    });
+
+    tearDownAll(() async {
+      await db.collection(sut.sourceName).drop();
     });
 
     test("sut should return saved user data", () async {
@@ -40,8 +44,30 @@ void main() {
         expect(r.id, isNotNull);
         expect(r.id, equals(input.id));
       });
+    });
 
-      await db.collection(sut.sourceName).drop();
+    test("sut should return updated user data", () async {
+      final newName = faker.person.firstName();
+      final editInput = EditUserInput(
+        tag: input.tag,
+        name: newName,
+        email: input.email,
+        id: input.id!,
+      );
+
+      final result = await sut.edit(editInput);
+
+      expect(result.isRight(), isTrue);
+      result.fold((l) => null, (r) {
+        expect(
+          r.id,
+          equals(input.id),
+        );
+        expect(
+          r.name,
+          equals(newName),
+        );
+      });
     });
   });
 }
