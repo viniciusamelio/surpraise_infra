@@ -46,6 +46,15 @@ void main() {
       });
     });
 
+    test("sut should return previous created user", () async {
+      final result = await sut.getById(input.id!);
+
+      expect(result, isNotNull);
+      expect(result!.email, equals(input.email));
+      expect(result.name, equals(input.name));
+      expect(result.tag, equals(input.tag));
+    });
+
     test("sut should return updated user data", () async {
       final newName = faker.person.firstName();
       final editInput = EditUserInput(
