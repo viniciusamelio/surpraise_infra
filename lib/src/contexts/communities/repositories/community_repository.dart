@@ -6,7 +6,8 @@ import 'package:surpraise_infra/src/contexts/communities/mappers/community_mappe
 import 'package:surpraise_infra/src/datasources/database/database_datasource.dart';
 import 'package:surpraise_infra/src/datasources/database/query.dart';
 
-class CommunityRepository implements CreateCommunityRepository {
+class CommunityRepository
+    implements CreateCommunityRepository, FindCommunityRepository {
   CommunityRepository({required DatabaseDatasource databaseDatasource})
       : _databaseDatasource = databaseDatasource;
 
@@ -30,6 +31,30 @@ class CommunityRepository implements CreateCommunityRepository {
         CommunityMapper.createOutputFromMap(
           result.data!,
         ),
+      );
+    } on Exception catch (e) {
+      return Left(e);
+    }
+  }
+
+  @override
+  Future<Either<Exception, FindCommunityOutput>> find(
+    FindCommunityInput input,
+  ) async {
+    try {
+      final result = await _databaseDatasource.get(
+        GetQuery(
+          sourceName: sourceName,
+          operator: FilterOperator.equalsTo,
+          value: input.id,
+          fieldName: "id",
+        ),
+      );
+      if (result.failure) {
+        return Left(Exception(result.errorMessage));
+      }
+      return Right(
+        CommunityMapper.findOutputFromMap(result.data!),
       );
     } on Exception catch (e) {
       return Left(e);

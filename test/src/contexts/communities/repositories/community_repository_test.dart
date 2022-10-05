@@ -44,5 +44,21 @@ void main() {
         expect(r.description, equals(createCommunityInput.description));
       });
     });
+
+    test("Sut should find created community", () async {
+      final result = await sut.find(
+        FindCommunityInput(id: createCommunityInput.id!),
+      );
+
+      expect(result.isRight(), isTrue);
+      result.fold((l) => null, (r) {
+        expect(r.id, equals(createCommunityInput.id));
+        expect(r.ownerId, equals(createCommunityInput.ownerId));
+        expect(r.title, equals(createCommunityInput.title));
+        expect(r.description, equals(createCommunityInput.description));
+        expect(r.members, isNotEmpty);
+        expect(r.members.length, equals(1));
+      });
+    });
   });
 }

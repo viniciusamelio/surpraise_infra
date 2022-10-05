@@ -11,6 +11,8 @@ abstract class CommunityMapper {
         "members": [
           {
             "member_id": input.ownerId,
+            "community_id": input.id,
+            "role": "owner",
           }
         ]
       };
@@ -22,5 +24,23 @@ abstract class CommunityMapper {
         title: map["title"],
         members: map["members"],
         ownerId: map["owner_id"],
+      );
+
+  static FindCommunityMemberDto memberFromMap(Map<String, dynamic> map) =>
+      FindCommunityMemberDto(
+        id: map["member_id"],
+        communityId: map["community_id"],
+        role: map["role"],
+      );
+
+  static FindCommunityOutput findOutputFromMap(Map<String, dynamic> map) =>
+      FindCommunityOutput(
+        id: map["id"],
+        ownerId: map["owner_id"],
+        description: map["description"],
+        title: map["title"],
+        members: (map["members"] as List)
+            .map((e) => CommunityMapper.memberFromMap(e))
+            .toList(),
       );
 }
