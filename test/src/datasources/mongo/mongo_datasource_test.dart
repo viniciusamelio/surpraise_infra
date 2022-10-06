@@ -16,6 +16,9 @@ void main() {
     "age": faker.randomGenerator.integer(80),
     "name": faker.person.firstName(),
     "id": faker.guid.guid(),
+    "array": [
+      {"bar": "foo"},
+    ]
   };
 
   setUp(() async {
@@ -26,6 +29,10 @@ void main() {
         db,
       ),
     );
+  });
+
+  tearDownAll(() async {
+    await sut.delete(collectionName, data["id"]);
   });
 
   group("Mongo Datasource: ", () {
@@ -91,6 +98,71 @@ void main() {
       expect(result.multiData!.length, equals(2));
 
       await sut.delete(collectionName, newDocId);
+    });
+
+    test("Should push and merge list data to $collectionName array field",
+        () async {
+      final result = await sut.push(
+        PushQuery(
+          sourceName: collectionName,
+          value: [
+            {
+              "name": "Ana",
+            },
+            {
+              "name": "Larissa",
+            },
+          ],
+          id: data["id"],
+          field: "array",
+        ),
+      );
+
+      expect(result.success, isTrue);
+      expect(result.data!["array"].length, equals(3));
+      expect(result.data!["array"].length, equals(3));
+      expect(
+        (result.data!["array"] as List)
+            .where((element) => element["name"] == "Ana")
+            .isNotEmpty,
+        isTrue,
+      );
+      expect(
+        (result.data!["array"] as List)
+            .where((element) => element["name"] == "Larissa")
+            .isNotEmpty,
+        isTrue,
+      );
+      expect(
+        (result.data!["array"] as List)
+            .where((element) => element["bar"] == "foo")
+            .isNotEmpty,
+        isTrue,
+      );
+    });
+
+    test("Should push single element data to $collectionName array field",
+        () async {
+      final result = await sut.push(
+        PushQuery(
+          sourceName: collectionName,
+          value: {
+            "name": "Camila",
+          },
+          id: data["id"],
+          field: "array",
+        ),
+      );
+
+      expect(result.success, isTrue);
+      expect(result.data!["array"].length, equals(4));
+      expect(result.data!["array"].length, equals(4));
+      expect(
+        (result.data!["array"] as List)
+            .where((element) => element["name"] == "Camila")
+            .isNotEmpty,
+        isTrue,
+      );
     });
 
     test("Should remove data from $collectionName", () async {

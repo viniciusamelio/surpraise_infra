@@ -43,4 +43,9 @@ abstract class CommunityMapper {
             .map((e) => CommunityMapper.memberFromMap(e))
             .toList(),
       );
+
+  static Map<String, dynamic> addMemberFromInput(MemberToAdd input) => {
+        "member_id": input.idMember,
+        "role": input.role,
+      };
 }

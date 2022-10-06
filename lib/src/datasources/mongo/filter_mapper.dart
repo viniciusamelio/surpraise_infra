@@ -23,4 +23,11 @@ abstract class MongoFilterMapper {
         return where.eq(fieldName, value);
     }
   }
+
+  static ModifierBuilder push(PushQuery query) {
+    if (query.value is Iterable) {
+      return modify.push(query.field, {"\$each": query.value});
+    }
+    return modify.push(query.field, query.value);
+  }
 }
