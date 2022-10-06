@@ -17,6 +17,17 @@ void main() {
       id: faker.guid.guid(),
     );
 
+    final newMembers = [
+      MemberToAdd(
+        idMember: faker.guid.guid(),
+        role: "member",
+      ),
+      MemberToAdd(
+        idMember: faker.guid.guid(),
+        role: "member",
+      ),
+    ];
+
     setUpAll(() async {
       db = await Db.create("mongodb://127.0.0.1:27017/surpraise");
       await db.open();
@@ -64,16 +75,7 @@ void main() {
       final result = await sut.addMembers(
         AddMembersInput(
           idCommunity: createCommunityInput.id!,
-          members: [
-            MemberToAdd(
-              idMember: faker.guid.guid(),
-              role: "member",
-            ),
-            MemberToAdd(
-              idMember: faker.guid.guid(),
-              role: "member",
-            ),
-          ],
+          members: newMembers,
         ),
       );
 
@@ -82,6 +84,26 @@ void main() {
         result.fold((l) => null, (r) => r),
         isA<AddMembersOutput>(),
       );
+    });
+
+    test("Sut should remove members", () async {
+      final result = await sut.removeMembers(
+        RemoveMembersInput(
+          communityId: createCommunityInput.id!,
+          memberIds: newMembers.map((e) => e.idMember).toList(),
+        ),
+      );
+      final getResult = await sut.find(FindCommunityInput(
+        id: createCommunityInput.id!,
+      ));
+
+      expect(result.isRight(), isTrue);
+      getResult.fold((l) => null, (r) {
+        expect(
+          r.members.length,
+          equals(1),
+        );
+      });
     });
   });
 }

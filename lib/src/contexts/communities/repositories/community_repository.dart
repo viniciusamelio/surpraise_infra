@@ -10,7 +10,8 @@ class CommunityRepository
     implements
         CreateCommunityRepository,
         FindCommunityRepository,
-        AddMembersRepository {
+        AddMembersRepository,
+        RemoveMembersRepository {
   CommunityRepository({required DatabaseDatasource databaseDatasource})
       : _databaseDatasource = databaseDatasource;
 
@@ -86,6 +87,36 @@ class CommunityRepository
       }
       return Right(
         AddMembersOutput(),
+      );
+    } on Exception catch (e) {
+      return Left(e);
+    }
+  }
+
+  @override
+  Future<Either<Exception, RemoveMembersOutput>> removeMembers(
+    RemoveMembersInput input,
+  ) async {
+    try {
+      final members = input.memberIds
+          .map((e) => {
+                "member_id": e,
+                "role": "member",
+              })
+          .toList();
+      final result = await _databaseDatasource.pop(
+        PopQuery(
+          sourceName: sourceName,
+          value: members,
+          id: input.communityId,
+          field: "members",
+        ),
+      );
+      if (result.failure) {
+        return Left(Exception(result.errorMessage));
+      }
+      return Right(
+        RemoveMembersOutput(),
       );
     } on Exception catch (e) {
       return Left(e);
