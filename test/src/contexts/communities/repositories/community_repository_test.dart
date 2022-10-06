@@ -60,5 +60,28 @@ void main() {
         expect(r.members.length, equals(1));
       });
     });
+    test("Sut should add new members to the community", () async {
+      final result = await sut.addMembers(
+        AddMembersInput(
+          idCommunity: createCommunityInput.id!,
+          members: [
+            MemberToAdd(
+              idMember: faker.guid.guid(),
+              role: "member",
+            ),
+            MemberToAdd(
+              idMember: faker.guid.guid(),
+              role: "member",
+            ),
+          ],
+        ),
+      );
+
+      expect(result.isRight(), isTrue);
+      expect(
+        result.fold((l) => null, (r) => r),
+        isA<AddMembersOutput>(),
+      );
+    });
   });
 }
