@@ -120,7 +120,6 @@ void main() {
 
       expect(result.success, isTrue);
       expect(result.data!["array"].length, equals(3));
-      expect(result.data!["array"].length, equals(3));
       expect(
         (result.data!["array"] as List)
             .where((element) => element["name"] == "Ana")
@@ -156,12 +155,57 @@ void main() {
 
       expect(result.success, isTrue);
       expect(result.data!["array"].length, equals(4));
-      expect(result.data!["array"].length, equals(4));
       expect(
         (result.data!["array"] as List)
             .where((element) => element["name"] == "Camila")
             .isNotEmpty,
         isTrue,
+      );
+    });
+
+    test("Should pop value from array", () async {
+      final result = await sut.pop(
+        PopQuery(
+          sourceName: collectionName,
+          value: {
+            "name": "Camila",
+          },
+          id: data["id"],
+          field: "array",
+        ),
+      );
+
+      expect(result.success, isTrue);
+      expect(result.data!["array"].length, equals(3));
+      expect(
+        (result.data!["array"] as List)
+            .where((element) => element["name"] == "Camila")
+            .isNotEmpty,
+        isFalse,
+      );
+    });
+
+    test("Should pop list of values from array", () async {
+      final result = await sut.pop(
+        PopQuery(
+          sourceName: collectionName,
+          value: [
+            {
+              "name": "Larissa",
+            }
+          ],
+          id: data["id"],
+          field: "array",
+        ),
+      );
+
+      expect(result.success, isTrue);
+      expect(result.data!["array"].length, equals(2));
+      expect(
+        (result.data!["array"] as List)
+            .where((element) => element["name"] == "Larissa")
+            .isNotEmpty,
+        isFalse,
       );
     });
 

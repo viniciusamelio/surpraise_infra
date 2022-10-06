@@ -9,8 +9,11 @@ abstract class DatabaseDatasource {
   /// Saves or updates an element to the database through [SaveQuery] options
   Future<QueryResult> save(SaveQuery query);
 
-  /// Add a single element or a list elements to an array field in a previous existing register.
+  /// Add a single element or a list of elements to an array field in a previous existing register.
   Future<QueryResult> push(PushQuery query);
+
+  /// Remove a single or a list of elements from an array in a previous existing register
+  Future<QueryResult> pop(PopQuery query);
 
   /// Removes an element from the database
   Future<QueryResult> delete(String sourceName, String id);

@@ -67,3 +67,12 @@ class PushQuery implements Query {
   final String id;
   final String field;
 }
+
+class PopQuery extends PushQuery {
+  PopQuery({
+    required super.sourceName,
+    required super.value,
+    required super.id,
+    required super.field,
+  });
+}

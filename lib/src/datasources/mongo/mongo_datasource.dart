@@ -171,4 +171,41 @@ class MongoDatasource implements DatabaseDatasource {
       );
     }
   }
+
+  @override
+  Future<QueryResult> pop(PopQuery query) async {
+    try {
+      await _mongo.db.collection(query.sourceName).updateOne(
+            MongoFilterMapper.buildFrom(
+              GetQuery(
+                sourceName: query.sourceName,
+                operator: FilterOperator.equalsTo,
+                value: query.id,
+                fieldName: "id",
+              ),
+            ),
+            MongoFilterMapper.pull(query),
+          );
+      final result = await get(
+        GetQuery(
+          sourceName: query.sourceName,
+          operator: FilterOperator.equalsTo,
+          value: query.id,
+          fieldName: "id",
+        ),
+      );
+      return QueryResult(
+        success: true,
+        failure: false,
+        data: result.data,
+        registersAffected: query.value is List ? query.value.length : 1,
+      );
+    } catch (e) {
+      return QueryResult(
+        success: false,
+        errorMessage: e.toString(),
+        failure: true,
+      );
+    }
+  }
 }

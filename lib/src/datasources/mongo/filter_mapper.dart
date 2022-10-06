@@ -30,4 +30,11 @@ abstract class MongoFilterMapper {
     }
     return modify.push(query.field, query.value);
   }
+
+  static ModifierBuilder pull(PopQuery query) {
+    if (query.value is Iterable) {
+      return modify.pullAll(query.field, query.value);
+    }
+    return modify.pull(query.field, query.value);
+  }
 }
