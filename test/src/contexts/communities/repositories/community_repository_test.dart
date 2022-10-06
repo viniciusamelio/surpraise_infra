@@ -6,6 +6,8 @@ import 'package:surpraise_infra/src/datasources/mongo/mongo_datasource.dart';
 import 'package:surpraise_infra/src/external/mongo/mongo.dart';
 import 'package:test/test.dart';
 
+import '../../../../test_settings.dart';
+
 void main() {
   late CommunityRepository sut;
   late Db db;
@@ -29,7 +31,7 @@ void main() {
     ];
 
     setUpAll(() async {
-      db = await Db.create("mongodb://127.0.0.1:27017/surpraise");
+      db = await Db.create(TestSettings.dbConnection);
       await db.open();
       sut = CommunityRepository(
         databaseDatasource: MongoDatasource(
