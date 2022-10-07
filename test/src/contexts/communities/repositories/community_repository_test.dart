@@ -107,5 +107,19 @@ void main() {
         );
       });
     });
+
+    test("Sut should delete community", () async {
+      final result =
+          await sut.delete(DeleteCommunityInput(id: createCommunityInput.id!));
+      final getResult = await sut.find(
+        FindCommunityInput(
+          id: createCommunityInput.id!,
+        ),
+      );
+
+      expect(result.isRight(), isTrue);
+      expect(getResult.isRight(), isFalse);
+      expect(getResult.fold((l) => l, (r) => r), isA<Exception>());
+    });
   });
 }

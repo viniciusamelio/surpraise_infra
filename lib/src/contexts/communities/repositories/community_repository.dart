@@ -11,7 +11,8 @@ class CommunityRepository
         CreateCommunityRepository,
         FindCommunityRepository,
         AddMembersRepository,
-        RemoveMembersRepository {
+        RemoveMembersRepository,
+        DeleteCommunityRepository {
   CommunityRepository({required DatabaseDatasource databaseDatasource})
       : _databaseDatasource = databaseDatasource;
 
@@ -56,6 +57,10 @@ class CommunityRepository
       );
       if (result.failure) {
         return Left(Exception(result.errorMessage));
+      } else if (result.data == null) {
+        return Left(
+          Exception("Could not find community through given id"),
+        );
       }
       return Right(
         CommunityMapper.findOutputFromMap(result.data!),
@@ -117,6 +122,25 @@ class CommunityRepository
       }
       return Right(
         RemoveMembersOutput(),
+      );
+    } on Exception catch (e) {
+      return Left(e);
+    }
+  }
+
+  @override
+  Future<Either<Exception, DeleteCommunityOutput>> delete(
+    DeleteCommunityInput input,
+  ) async {
+    try {
+      final result = await _databaseDatasource.delete(sourceName, input.id);
+      if (result.failure) {
+        return Left(Exception(result.errorMessage));
+      }
+      return Right(
+        DeleteCommunityOutput(
+          communityId: input.id,
+        ),
       );
     } on Exception catch (e) {
       return Left(e);
