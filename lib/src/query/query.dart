@@ -1,8 +1,12 @@
+import 'package:fpdart/fpdart.dart';
+import 'package:surpraise_infra/src/query/query_error.dart';
+import 'package:surpraise_infra/src/query/query_input.dart';
 import 'package:surpraise_infra/src/query/query_output.dart';
 
 export "query_input.dart";
 export "query_output.dart";
+export "query_error.dart";
 
-abstract class Query<T extends QueryOutput> {
-  Future<T> call();
+abstract class DataQuery<T extends QueryInput> {
+  Future<Either<QueryError, QueryOutput>> call(T input);
 }
