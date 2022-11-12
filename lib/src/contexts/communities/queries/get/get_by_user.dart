@@ -30,6 +30,21 @@ class GetCommunitiesByUserQuery
       final fieldName = input.asOwner! ? "owner_id" : "member_id";
       communitiesOrError =
           await _handleCommunitiesAccordingToOwning(fieldName, input);
+    } else {
+      final ownerCommunities =
+          await _handleCommunitiesAsOwner(input, "owner_id");
+      final memberCommunities =
+          await _handleCommunitiesAsMember(input, "member_id");
+      communitiesOrError = QueryResult(
+        success: ownerCommunities.success && memberCommunities.success,
+        failure: ownerCommunities.failure && memberCommunities.failure,
+        errorMessage:
+            ownerCommunities.errorMessage ?? memberCommunities.errorMessage,
+        multiData: ownerCommunities.multiData
+          ?..addAll(
+            memberCommunities.multiData ?? [],
+          ),
+      );
     }
 
     if (communitiesOrError.failure) {

@@ -91,6 +91,29 @@ void main() {
         );
       });
     });
+
+    test(
+        "sut should return all communities that given user is either member or owner of",
+        () async {
+      await createAndAddMember(repository, faker.guid.guid(), userId);
+      await createAndAddMember(repository, faker.guid.guid(), userId);
+      await createCommunity(repository, userId);
+      await createCommunity(repository, userId);
+
+      final communitiesOrError = await sut(
+        GetCommunitiesByUserInput(
+          id: userId,
+        ),
+      );
+
+      expect(communitiesOrError.isRight(), isTrue);
+      communitiesOrError.fold((l) => null, (r) {
+        expect(
+          r.value.length,
+          equals(9),
+        );
+      });
+    });
   });
 }
 
