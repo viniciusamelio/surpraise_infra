@@ -29,6 +29,14 @@ class CommunityRepository
         sourceName: sourceName,
         value: CommunityMapper.createMapFromInput(input),
       ));
+      await _databaseDatasource.push(
+        PushQuery(
+          sourceName: "users",
+          value: input.id,
+          id: input.ownerId,
+          field: "owned_communities",
+        ),
+      );
       if (result.failure) {
         return Left(Exception(result.errorMessage));
       }
@@ -87,6 +95,17 @@ class CommunityRepository
           field: "members",
         ),
       );
+      for (final member in input.members) {
+        await _databaseDatasource.push(
+          PushQuery(
+            sourceName: "users",
+            value: input.idCommunity,
+            id: member.idMember,
+            field: "communities",
+          ),
+        );
+      }
+
       if (result.failure) {
         return Left(Exception(result.errorMessage));
       }
@@ -117,6 +136,17 @@ class CommunityRepository
           field: "members",
         ),
       );
+      for (final memberId in input.memberIds) {
+        await _databaseDatasource.pop(
+          PopQuery(
+            sourceName: "users",
+            value: input.communityId,
+            id: memberId,
+            field: "communities",
+          ),
+        );
+      }
+
       if (result.failure) {
         return Left(Exception(result.errorMessage));
       }
