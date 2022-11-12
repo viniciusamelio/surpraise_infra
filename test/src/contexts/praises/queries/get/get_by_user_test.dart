@@ -82,6 +82,28 @@ void main() {
         );
       });
     });
+
+    test(
+        "sut should retrieve only received praises when input.asPraiser is false",
+        () async {
+      await createPraiseAsPraised(repository, userId);
+      await createPraiseAsPraised(repository, userId);
+
+      final praisesOrError = await sut(
+        GetPraisesByUserInput(
+          id: userId,
+          asPraiser: false,
+        ),
+      );
+
+      expect(praisesOrError.fold((l) => l, (r) => r), isA<QueryOutput>());
+      praisesOrError.fold((l) => null, (r) {
+        expect(
+          r.value.length,
+          equals(5),
+        );
+      });
+    });
   });
 }
 
