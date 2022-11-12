@@ -28,47 +28,8 @@ class GetCommunitiesByUserQuery
     late QueryResult communitiesOrError;
     if (input.asOwner != null) {
       final fieldName = input.asOwner! ? "owner_id" : "member_id";
-      if (input.asOwner!) {
-        communitiesOrError = await databaseDatasource.get(
-          GetQuery(
-            sourceName: "communities",
-            operator: FilterOperator.equalsTo,
-            value: input.id,
-            fieldName: fieldName,
-            singleResult: false,
-          ),
-        );
-      } else {
-        final userOrError = await databaseDatasource.get(
-          GetQuery(
-            sourceName: "users",
-            operator: FilterOperator.equalsTo,
-            value: input.id,
-            fieldName: "id",
-          ),
-        );
-        final List<AggregateFilter> filters = userOrError.data?["communities"]
-            .map<OrFilter>(
-              (e) => OrFilter(
-                fieldName: "id",
-                operator: FilterOperator.equalsTo,
-                value: e,
-              ),
-            )
-            .toList();
-        filters.removeAt(0);
-
-        communitiesOrError = await databaseDatasource.get(
-          GetQuery(
-            sourceName: "communities",
-            operator: FilterOperator.equalsTo,
-            value: userOrError.data?["communities"].first,
-            filters: filters,
-            fieldName: "id",
-            singleResult: false,
-          ),
-        );
-      }
+      communitiesOrError =
+          await _handleCommunitiesAccordingToOwning(fieldName, input);
     }
 
     if (communitiesOrError.failure) {
@@ -88,6 +49,64 @@ class GetCommunitiesByUserQuery
     return Right(
       GetCommunitiesByUserOutput(
         value: communitiesOrError.multiData ?? [communitiesOrError.data!],
+      ),
+    );
+  }
+
+  Future<QueryResult> _handleCommunitiesAccordingToOwning(
+    String fieldName,
+    GetCommunitiesByUserInput input,
+  ) async {
+    if (input.asOwner!) {
+      return await _handleCommunitiesAsOwner(input, fieldName);
+    }
+    return await _handleCommunitiesAsMember(input, fieldName);
+  }
+
+  Future<QueryResult> _handleCommunitiesAsOwner(
+      GetCommunitiesByUserInput input, String fieldName) async {
+    return await databaseDatasource.get(
+      GetQuery(
+        sourceName: "communities",
+        operator: FilterOperator.equalsTo,
+        value: input.id,
+        fieldName: fieldName,
+        singleResult: false,
+      ),
+    );
+  }
+
+  Future<QueryResult> _handleCommunitiesAsMember(
+    GetCommunitiesByUserInput input,
+    String fieldName,
+  ) async {
+    final userOrError = await databaseDatasource.get(
+      GetQuery(
+        sourceName: "users",
+        operator: FilterOperator.equalsTo,
+        value: input.id,
+        fieldName: "id",
+      ),
+    );
+    final List<AggregateFilter> filters = userOrError.data?["communities"]
+        .map<OrFilter>(
+          (e) => OrFilter(
+            fieldName: "id",
+            operator: FilterOperator.equalsTo,
+            value: e,
+          ),
+        )
+        .toList();
+    filters.removeAt(0);
+
+    return await databaseDatasource.get(
+      GetQuery(
+        sourceName: "communities",
+        operator: FilterOperator.equalsTo,
+        value: userOrError.data?["communities"].first,
+        filters: filters,
+        fieldName: "id",
+        singleResult: false,
       ),
     );
   }
