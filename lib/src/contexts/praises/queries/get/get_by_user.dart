@@ -30,6 +30,7 @@ class GetPraisesByUserQuery implements DataQuery<GetPraisesByUserInput> {
           operator: FilterOperator.equalsTo,
           value: input.id,
           fieldName: fieldName,
+          singleResult: false,
         ),
       );
 

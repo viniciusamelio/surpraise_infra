@@ -33,7 +33,7 @@ void main() {
       );
     });
 
-    tearDown(() async {
+    tearDownAll(() async {
       await db.collection("praises").drop();
     });
 
@@ -41,26 +41,10 @@ void main() {
         "Sut should retrieve all praises (sent and received) when input.asPraiser is null",
         () async {
       for (var i = 0; i < 3; i++) {
-        await repository.create(
-          PraiseInput(
-            commmunityId: faker.guid.guid(),
-            message: faker.lorem.words(7).toString(),
-            praisedId: userId,
-            praiserId: faker.guid.guid(),
-            topic: "#kind",
-          )..id = faker.guid.guid(),
-        );
+        await createPraiseAsPraised(repository, userId);
       }
       for (var i = 0; i < 3; i++) {
-        await repository.create(
-          PraiseInput(
-            commmunityId: faker.guid.guid(),
-            message: faker.lorem.words(7).toString(),
-            praisedId: faker.guid.guid(),
-            praiserId: userId,
-            topic: "#kind",
-          )..id = faker.guid.guid(),
-        );
+        await createPraiseAsPraiser(repository, userId);
       }
 
       final praisesOrError = await sut(
@@ -78,5 +62,51 @@ void main() {
         );
       });
     });
+
+    test("sut should retrieve only sent praises when input.asPraiser is true",
+        () async {
+      await createPraiseAsPraiser(repository, userId);
+
+      final praisesOrError = await sut(
+        GetPraisesByUserInput(
+          id: userId,
+          asPraiser: true,
+        ),
+      );
+
+      expect(praisesOrError.fold((l) => l, (r) => r), isA<QueryOutput>());
+      praisesOrError.fold((l) => null, (r) {
+        expect(
+          r.value.length,
+          equals(4),
+        );
+      });
+    });
   });
+}
+
+Future<void> createPraiseAsPraiser(
+    CreatePraiseRepository repository, String userId) async {
+  await repository.create(
+    PraiseInput(
+      commmunityId: faker.guid.guid(),
+      message: faker.lorem.words(7).toString(),
+      praisedId: faker.guid.guid(),
+      praiserId: userId,
+      topic: "#kind",
+    )..id = faker.guid.guid(),
+  );
+}
+
+Future<void> createPraiseAsPraised(
+    CreatePraiseRepository repository, String userId) async {
+  await repository.create(
+    PraiseInput(
+      commmunityId: faker.guid.guid(),
+      message: faker.lorem.words(7).toString(),
+      praisedId: userId,
+      praiserId: faker.guid.guid(),
+      topic: "#kind",
+    )..id = faker.guid.guid(),
+  );
 }
