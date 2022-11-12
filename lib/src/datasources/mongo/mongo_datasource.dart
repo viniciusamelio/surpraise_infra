@@ -65,7 +65,8 @@ class MongoDatasource implements DatabaseDatasource {
       return QueryResult(
         success: true,
         failure: false,
-        data: result.first,
+        data: query.singleResult ? result.first : null,
+        multiData: !query.singleResult ? result : null,
       );
     } catch (e) {
       return QueryResult(

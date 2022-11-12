@@ -28,6 +28,7 @@ class GetQuery<T> implements Query {
     required this.value,
     required this.fieldName,
     this.filters,
+    this.singleResult = true,
   });
 
   @override
@@ -37,7 +38,27 @@ class GetQuery<T> implements Query {
   final String fieldName;
   final T value;
 
+  final bool singleResult;
+
   final List<AggregateFilter>? filters;
+
+  GetQuery<T> copyWith({
+    String? sourceName,
+    FilterOperator? operator,
+    String? fieldName,
+    T? value,
+    bool? singleResult,
+    List<AggregateFilter>? filters,
+  }) {
+    return GetQuery<T>(
+      sourceName: sourceName ?? this.sourceName,
+      operator: operator ?? this.operator,
+      fieldName: fieldName ?? this.fieldName,
+      value: value ?? this.value,
+      singleResult: singleResult ?? this.singleResult,
+      filters: filters ?? this.filters,
+    );
+  }
 }
 
 class SaveQuery implements Query {
