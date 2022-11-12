@@ -9,3 +9,11 @@ class GetPraisesByUserInput implements QueryInput {
   final String id;
   final bool? asPraiser;
 }
+
+class GetPraisesByCommunityInput implements QueryInput {
+  GetPraisesByCommunityInput({
+    required this.id,
+  });
+
+  final String id;
+}
