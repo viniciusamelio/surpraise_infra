@@ -1,10 +1,9 @@
+import 'package:surpraise_backend_dependencies/surpraise_backend_dependencies.dart';
 import 'package:surpraise_infra/src/datasources/database/filter.dart';
 
 import '../../../../datasources/database/result.dart';
 import 'input.dart';
 import 'output.dart';
-
-import 'package:fpdart/fpdart.dart';
 
 import 'package:surpraise_infra/src/datasources/database/database_datasource.dart';
 import 'package:surpraise_infra/src/datasources/database/query.dart';

@@ -1,5 +1,5 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
-import 'package:fpdart/fpdart.dart';
+import 'package:surpraise_backend_dependencies/surpraise_backend_dependencies.dart';
 import 'package:surpraise_core/surpraise_core.dart';
 
 import 'package:surpraise_infra/src/contexts/users/mappers/user_mapper.dart';

@@ -1,4 +1,4 @@
-import 'package:fpdart/fpdart.dart';
+import 'package:surpraise_backend_dependencies/surpraise_backend_dependencies.dart';
 import 'package:surpraise_infra/src/query/query_error.dart';
 import 'package:surpraise_infra/src/query/query_input.dart';
 import 'package:surpraise_infra/src/query/query_output.dart';
