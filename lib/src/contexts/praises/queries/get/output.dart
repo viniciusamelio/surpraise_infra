@@ -17,3 +17,12 @@ class GetPraisesByCommunityOutput implements QueryOutput {
   @override
   final List<Map<String, dynamic>> value;
 }
+
+class GetPraiseOutput implements QueryOutput<Map<String, dynamic>> {
+  GetPraiseOutput({
+    required this.value,
+  });
+
+  @override
+  final Map<String, dynamic> value;
+}
