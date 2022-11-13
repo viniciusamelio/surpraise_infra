@@ -10,3 +10,11 @@ class GetCommunitiesByUserOutput implements QueryOutput<JsonList> {
   @override
   final JsonList value;
 }
+
+class GetCommunityOutput implements QueryOutput<Map<String, dynamic>> {
+  @override
+  final Map<String, dynamic> value;
+  GetCommunityOutput({
+    required this.value,
+  });
+}
