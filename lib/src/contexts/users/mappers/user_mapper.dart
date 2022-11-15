@@ -16,6 +16,13 @@ abstract class UserMapper {
         id: map['id'],
       );
 
+  static CreateUserInput createUserInputFromMap(Map<String, dynamic> map) =>
+      CreateUserInput(
+        tag: map['tag'],
+        name: map['name'],
+        email: map['email'],
+      );
+
   static Map<String, dynamic> editUserInputToMap(EditUserInput input) => {
         "id": input.id,
         "name": input.name,
