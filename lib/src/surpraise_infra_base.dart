@@ -3,3 +3,4 @@ export "./datasources/datasources.dart";
 export "./external/external.dart";
 export "./failures/failures.dart";
 export "./query/query.dart";
+export "./id/uuid_service.dart";
