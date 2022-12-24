@@ -36,6 +36,7 @@ void main() {
           databaseDatasource: datasource,
         ),
         idService: mockIdService,
+        eventBus: StreamEventBus(),
       );
       sut = GetUserQuery(
         databaseDatasource: datasource,
