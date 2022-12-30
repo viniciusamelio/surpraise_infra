@@ -52,6 +52,7 @@ class UserRepository
         SaveQuery(
           sourceName: sourceName,
           value: UserMapper.editUserInputToMap(input),
+          id: input.id,
         ),
       );
       if (result.failure) {
