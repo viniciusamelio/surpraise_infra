@@ -39,9 +39,13 @@ abstract class CommunityMapper {
         ownerId: map["owner_id"],
         description: map["description"],
         title: map["title"],
-        members: (map["members"] as List)
-            .map((e) => CommunityMapper.memberFromMap(e))
-            .toList(),
+        members: (map["members"] as List).map((e) {
+          if (!e.containsKey("community_id")) {
+            e["community_id"] = map["id"];
+          }
+
+          return CommunityMapper.memberFromMap(e);
+        }).toList(),
       );
 
   static Map<String, dynamic> addMemberFromInput(MemberToAdd input) => {
