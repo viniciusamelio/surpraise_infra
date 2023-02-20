@@ -6,7 +6,8 @@ import 'package:surpraise_infra/src/contexts/praises/mappers/praise_mapper.dart'
 import 'package:surpraise_infra/src/datasources/database/database_datasource.dart';
 import 'package:surpraise_infra/src/datasources/database/query.dart';
 
-class PraiseRepository implements CreatePraiseRepository {
+class PraiseRepository
+    implements CreatePraiseRepository, FindPraiseUsersRepository {
   PraiseRepository({
     required DatabaseDatasource datasource,
   }) : _datasource = datasource;
@@ -31,6 +32,53 @@ class PraiseRepository implements CreatePraiseRepository {
       }
       return Right(
         PraiseOutput(),
+      );
+    } on Exception catch (e) {
+      return Left(e);
+    }
+  }
+
+  @override
+  Future<Either<Exception, FindPraiseUsersDto>> find({
+    required String praiserId,
+    required String praisedId,
+  }) async {
+    try {
+      final praised = await _datasource.get(
+        GetQuery(
+          sourceName: "users",
+          operator: FilterOperator.equalsTo,
+          value: praisedId,
+          fieldName: "id",
+        ),
+      );
+
+      final praiser = await _datasource.get(
+        GetQuery(
+          sourceName: "users",
+          operator: FilterOperator.equalsTo,
+          value: praiserId,
+          fieldName: "id",
+        ),
+      );
+
+      if (praised.failure || praiser.failure) {
+        return Left(
+          Exception(praised.errorMessage ?? praiser.errorMessage),
+        );
+      }
+
+      return Right(
+        FindPraiseUsersDto(
+          praisedDto: PraisedDto(
+            tag: praised.data!["tag"],
+            communities: praised.data!["communities"],
+          ),
+          praiserDto: PraiserDto(
+            tag: praiser.data!["tag"],
+            communities: praiser.data!["communities"],
+          ),
+        ),
       );
     } on Exception catch (e) {
       return Left(e);
