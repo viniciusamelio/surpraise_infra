@@ -72,11 +72,13 @@ class PraiseRepository
         FindPraiseUsersDto(
           praisedDto: PraisedDto(
             tag: praised.data!["tag"],
-            communities: (praised.data!["communities"] as List).cast<String>(),
+            communities:
+                ((praised.data!["communities"] ?? []) as List).cast<String>(),
           ),
           praiserDto: PraiserDto(
             tag: praiser.data!["tag"],
-            communities: (praiser.data!["communities"] as List).cast<String>(),
+            communities:
+                ((praiser.data!["communities"] ?? []) as List).cast<String>(),
           ),
         ),
       );
