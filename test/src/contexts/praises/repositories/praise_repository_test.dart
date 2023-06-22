@@ -32,7 +32,10 @@ void main() {
     final mongo = Mongo(
       db,
     );
-    datasource = MongoDatasource(mongo);
+    datasource = MongoDatasource(
+      mongo,
+      TestSettings.dbConnection,
+    );
     sut = PraiseRepository(datasource: datasource);
   });
 

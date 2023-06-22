@@ -27,6 +27,7 @@ void main() {
       sut = UserRepository(
         databaseDatasource: MongoDatasource(
           Mongo(db),
+          TestSettings.dbConnection,
         ),
       );
     });

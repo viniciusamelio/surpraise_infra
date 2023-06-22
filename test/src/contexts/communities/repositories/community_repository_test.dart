@@ -38,6 +38,7 @@ void main() {
           Mongo(
             db,
           ),
+          TestSettings.dbConnection,
         ),
       );
     });

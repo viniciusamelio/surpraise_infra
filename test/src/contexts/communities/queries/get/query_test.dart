@@ -34,14 +34,10 @@ void main() {
       await db.open();
       final mongo = Mongo(db);
       sut = GetCommunityQuery(
-        databaseDatasource: MongoDatasource(
-          mongo,
-        ),
+        databaseDatasource: MongoDatasource(mongo, TestSettings.dbConnection),
       );
       communityRepository = CommunityRepository(
-        databaseDatasource: MongoDatasource(
-          mongo,
-        ),
+        databaseDatasource: MongoDatasource(mongo, TestSettings.dbConnection),
       );
     });
 

@@ -1,3 +1,4 @@
+import 'package:surpraise_backend_dependencies/surpraise_backend_dependencies.dart';
 import 'package:surpraise_infra/src/datasources/database/database_datasource.dart';
 import 'package:surpraise_infra/src/datasources/database/filter.dart';
 import 'package:surpraise_infra/src/datasources/database/query.dart';
@@ -6,18 +7,24 @@ import 'package:surpraise_infra/src/datasources/mongo/filter_mapper.dart';
 import 'package:surpraise_infra/src/external/mongo/mongo.dart';
 
 class MongoDatasource implements DatabaseDatasource {
-  MongoDatasource(this._mongo);
+  MongoDatasource(
+    this._mongo,
+    this.uriString,
+  );
 
   final Mongo _mongo;
+  final String uriString;
 
   @override
   delete(String sourceName, String id) async {
+    await Db(uriString).open();
     final result = await _mongo.db.collection(sourceName).deleteOne(
       {
         "id": id,
       },
     );
 
+    await Db(uriString).close();
     return QueryResult(
       success: result.isSuccess,
       failure: result.isFailure,
@@ -30,6 +37,7 @@ class MongoDatasource implements DatabaseDatasource {
   @override
   get(GetQuery query) async {
     try {
+      await Db(uriString).open();
       var mongoQuery = MongoFilterMapper.buildFrom(query);
       query.filters?.forEach((filter) {
         if (filter is AndFilter) {
@@ -75,12 +83,16 @@ class MongoDatasource implements DatabaseDatasource {
         errorMessage: e.toString(),
         registersAffected: 0,
       );
+    } finally {
+      await Db(uriString).close();
     }
   }
 
   @override
   save(SaveQuery query) async {
     try {
+      await Db(uriString).open();
+
       if (query.id != null) {
         await _mongo.db.collection(query.sourceName).update(
               MongoFilterMapper.buildFrom(
@@ -116,12 +128,16 @@ class MongoDatasource implements DatabaseDatasource {
         data: query.value,
         registersAffected: 0,
       );
+    } finally {
+      await Db(uriString).close();
     }
   }
 
   @override
   getAll(String sourceName) async {
     try {
+      await Db(uriString).open();
+
       final result = await _mongo.db.collection(sourceName).find().toList();
       return QueryResult(
         success: true,
@@ -133,12 +149,16 @@ class MongoDatasource implements DatabaseDatasource {
         success: false,
         failure: true,
       );
+    } finally {
+      await Db(uriString).close();
     }
   }
 
   @override
   Future<QueryResult> push(PushQuery query) async {
     try {
+      await Db(uriString).open();
+
       await _mongo.db.collection(query.sourceName).updateOne(
             MongoFilterMapper.buildFrom(
               GetQuery(
@@ -170,12 +190,16 @@ class MongoDatasource implements DatabaseDatasource {
         errorMessage: e.toString(),
         failure: true,
       );
+    } finally {
+      await Db(uriString).close();
     }
   }
 
   @override
   Future<QueryResult> pop(PopQuery query) async {
     try {
+      await Db(uriString).open();
+
       await _mongo.db.collection(query.sourceName).updateOne(
             MongoFilterMapper.buildFrom(
               GetQuery(
@@ -207,6 +231,8 @@ class MongoDatasource implements DatabaseDatasource {
         errorMessage: e.toString(),
         failure: true,
       );
+    } finally {
+      await Db(uriString).close();
     }
   }
 }

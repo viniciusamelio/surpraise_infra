@@ -22,14 +22,10 @@ void main() {
       final mongo = Mongo(db);
       await db.open();
       sut = GetPraisesByUserQuery(
-        databaseDatasource: MongoDatasource(
-          mongo,
-        ),
+        databaseDatasource: MongoDatasource(mongo, TestSettings.dbConnection),
       );
       repository = PraiseRepository(
-        datasource: MongoDatasource(
-          mongo,
-        ),
+        datasource: MongoDatasource(mongo, TestSettings.dbConnection),
       );
     });
 

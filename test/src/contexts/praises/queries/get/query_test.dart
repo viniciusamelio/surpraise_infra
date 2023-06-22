@@ -25,14 +25,10 @@ void main() {
       final mongo = Mongo(db);
 
       sut = GetPraiseQuery(
-        databaseDatasource: MongoDatasource(
-          mongo,
-        ),
+        databaseDatasource: MongoDatasource(mongo, TestSettings.dbConnection),
       );
       praiseRepository = PraiseRepository(
-        datasource: MongoDatasource(
-          mongo,
-        ),
+        datasource: MongoDatasource(mongo, TestSettings.dbConnection),
       );
     });
 

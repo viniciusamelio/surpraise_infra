@@ -24,19 +24,13 @@ void main() {
       final mongo = Mongo(db);
       await db.open();
       sut = GetCommunitiesByUserQuery(
-        databaseDatasource: MongoDatasource(
-          mongo,
-        ),
+        databaseDatasource: MongoDatasource(mongo, TestSettings.dbConnection),
       );
       repository = CommunityRepository(
-        databaseDatasource: MongoDatasource(
-          mongo,
-        ),
+        databaseDatasource: MongoDatasource(mongo, TestSettings.dbConnection),
       );
       userRepository = UserRepository(
-        databaseDatasource: MongoDatasource(
-          mongo,
-        ),
+        databaseDatasource: MongoDatasource(mongo, TestSettings.dbConnection),
       );
 
       await userRepository.create(

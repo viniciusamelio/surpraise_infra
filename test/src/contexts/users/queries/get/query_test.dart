@@ -30,6 +30,7 @@ void main() {
         Mongo(
           db,
         ),
+        TestSettings.dbConnection,
       );
       createUserUsecase = DbCreateUserUsecase(
         createUserRepository: UserRepository(
