@@ -5,6 +5,7 @@ import 'package:surpraise_infra/src/contexts/praises/mappers/praise_mapper.dart'
 
 import 'package:surpraise_infra/src/datasources/database/database_datasource.dart';
 import 'package:surpraise_infra/src/datasources/database/query.dart';
+import 'package:surpraise_infra/src/datasources/database/result.dart';
 
 class PraiseRepository
     implements CreatePraiseRepository, FindPraiseUsersRepository {
@@ -20,11 +21,13 @@ class PraiseRepository
   Future<Either<Exception, PraiseOutput>> create(PraiseInput input) async {
     try {
       final rawPraiseData = PraiseMapper.inputToMap(input);
-      final praised = await _datasource.get(
+      final praised = await _getUserData(input.praisedId);
+      final praiser = await _getUserData(input.praiserId);
+      final community = await _datasource.get(
         GetQuery(
-          sourceName: "users",
+          sourceName: "communities",
           operator: FilterOperator.equalsTo,
-          value: input.praisedId,
+          value: input.commmunityId,
           fieldName: "id",
         ),
       );
@@ -41,6 +44,13 @@ class PraiseRepository
           value: {
             ...rawPraiseData,
             "praised": praised.data!,
+            "praiser": praiser.data,
+            "community": community.data != null
+                ? {
+                    "title": community.data?["title"],
+                    "id": community.data?["id"],
+                  }
+                : null,
           },
         ),
       );
@@ -55,6 +65,17 @@ class PraiseRepository
     } on Exception catch (e) {
       return Left(e);
     }
+  }
+
+  Future<QueryResult> _getUserData(String userId) {
+    return _datasource.get(
+      GetQuery(
+        sourceName: "users",
+        operator: FilterOperator.equalsTo,
+        value: userId,
+        fieldName: "id",
+      ),
+    );
   }
 
   @override
