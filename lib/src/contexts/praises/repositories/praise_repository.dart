@@ -19,10 +19,29 @@ class PraiseRepository
   @override
   Future<Either<Exception, PraiseOutput>> create(PraiseInput input) async {
     try {
+      final rawPraiseData = PraiseMapper.inputToMap(input);
+      final praised = await _datasource.get(
+        GetQuery(
+          sourceName: "users",
+          operator: FilterOperator.equalsTo,
+          value: input.praisedId,
+          fieldName: "id",
+        ),
+      );
+
+      if (praised.data == null || praised.failure) {
+        return Left(
+          Exception("Praised user not found"),
+        );
+      }
+
       final result = await _datasource.save(
         SaveQuery(
           sourceName: sourceName,
-          value: PraiseMapper.inputToMap(input),
+          value: {
+            ...rawPraiseData,
+            "praised": praised.data!,
+          },
         ),
       );
       if (result.failure) {

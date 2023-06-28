@@ -1,10 +1,7 @@
 import 'package:faker/faker.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:surpraise_core/surpraise_core.dart';
-import 'package:surpraise_infra/src/contexts/praises/repositories/praise_repository.dart';
-import 'package:surpraise_infra/src/datasources/database/database_datasource.dart';
-import 'package:surpraise_infra/src/datasources/mongo/mongo_datasource.dart';
-import 'package:surpraise_infra/src/external/mongo/mongo.dart';
+import 'package:surpraise_infra/surpraise_infra.dart';
 import 'package:test/test.dart';
 
 import '../../../../test_settings.dart';
@@ -17,14 +14,7 @@ void main() {
 
   setUpAll(() async {
     id = faker.guid.guid();
-    input = PraiseInput(
-      commmunityId: faker.guid.guid(),
-      message: faker.lorem.words(6).toString(),
-      praisedId: faker.guid.guid(),
-      praiserId: faker.guid.guid(),
-      topic: "#test",
-    );
-    input.id = id;
+
     final db = Db(
       TestSettings.dbConnection,
     );
@@ -36,6 +26,33 @@ void main() {
       mongo,
       TestSettings.dbConnection,
     );
+
+    final praisedId = faker.guid.guid();
+
+    final CreateUserRepository userRepository = UserRepository(
+      databaseDatasource: MongoDatasource(
+        mongo,
+        TestSettings.dbConnection,
+      ),
+    );
+
+    await userRepository.create(
+      CreateUserInput(
+        tag: "@testingUser${faker.randomGenerator.integer(20)}",
+        name: faker.lorem.word(),
+        email: faker.internet.email(),
+        id: praisedId,
+      ),
+    );
+
+    input = PraiseInput(
+      commmunityId: faker.guid.guid(),
+      message: faker.lorem.words(6).toString(),
+      praisedId: praisedId,
+      praiserId: faker.guid.guid(),
+      topic: "#test",
+    );
+    input.id = id;
     sut = PraiseRepository(datasource: datasource);
   });
 
