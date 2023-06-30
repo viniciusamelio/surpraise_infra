@@ -48,6 +48,22 @@ abstract class CommunityMapper {
         }).toList(),
       );
 
+  static Map<String, dynamic> findOutputToMap(FindCommunityOutput output) => {
+        "id": output.id,
+        "owner_id": output.ownerId,
+        "description": output.description,
+        "title": output.title,
+        "members": output.members
+            .map(
+              (e) => {
+                "member_id": e.id,
+                "community_id": e.communityId,
+                "role": e.role
+              },
+            )
+            .toList(),
+      };
+
   static Map<String, dynamic> addMemberFromInput(MemberToAdd input) => {
         "member_id": input.idMember,
         "role": input.role,
