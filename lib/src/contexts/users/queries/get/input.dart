@@ -6,3 +6,10 @@ class GetUserQueryInput implements QueryInput {
   });
   final String id;
 }
+
+class GetUserByTagQueryInput implements QueryInput {
+  GetUserByTagQueryInput({
+    required this.tag,
+  });
+  final String tag;
+}
