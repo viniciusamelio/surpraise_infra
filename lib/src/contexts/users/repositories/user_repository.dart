@@ -120,6 +120,30 @@ class UserRepository
       return null;
     }
   }
+
+  Future<GetUserOutput?> getByTag(String tag) async {
+    try {
+      final result = await _datasource.get(
+        GetQuery(
+          sourceName: sourceName,
+          operator: FilterOperator.equalsTo,
+          value: tag,
+          fieldName: "tag",
+        ),
+      );
+      if (result.failure) {
+        return null;
+      }
+      return GetUserOutput(
+        tag: result.data!["tag"],
+        name: result.data!["name"],
+        email: result.data!["email"],
+        id: result.data!["id"],
+      );
+    } catch (_) {
+      return null;
+    }
+  }
 }
 
 class GetUserOutput {
