@@ -51,6 +51,7 @@ void main() {
           ownerId: user.fold((left) => null, (right) => right)!.id,
           title: faker.lorem.word(),
           id: faker.guid.guid(),
+          imageUrl: faker.lorem.word(),
         ),
       );
 

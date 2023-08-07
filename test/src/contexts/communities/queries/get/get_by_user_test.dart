@@ -122,6 +122,7 @@ Future<String> createCommunity(
       ownerId: ownerId,
       title: "A random testing community",
       id: id,
+      imageUrl: faker.lorem.word(),
     ),
   );
   return id;

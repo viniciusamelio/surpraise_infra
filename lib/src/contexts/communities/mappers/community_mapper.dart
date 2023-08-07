@@ -5,6 +5,7 @@ abstract class CommunityMapper {
       {
         "id": input.id,
         "owner_id": input.ownerId,
+        "image": input.imageUrl,
         "description": input.description,
         "title": input.title,
         "plan_member_limit": input.planMemberLimit,

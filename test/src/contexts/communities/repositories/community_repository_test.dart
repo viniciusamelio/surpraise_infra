@@ -17,6 +17,7 @@ void main() {
       ownerId: faker.guid.guid(),
       title: faker.lorem.word(),
       id: faker.guid.guid(),
+      imageUrl: faker.lorem.word(),
     );
 
     final newMembers = [
