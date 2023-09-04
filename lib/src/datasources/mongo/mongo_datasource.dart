@@ -16,11 +16,11 @@ class MongoDatasource implements DatabaseDatasource {
   final String uriString;
 
   @override
-  delete(String sourceName, String id) async {
+  delete(GetQuery query) async {
     await Db(uriString).open();
-    final result = await _mongo.db.collection(sourceName).deleteOne(
+    final result = await _mongo.db.collection(query.sourceName).deleteOne(
       {
-        "id": id,
+        query.fieldName: query.value,
       },
     );
 

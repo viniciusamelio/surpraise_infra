@@ -16,7 +16,7 @@ abstract class DatabaseDatasource {
   Future<QueryResult> pop(PopQuery query);
 
   /// Removes an element from the database
-  Future<QueryResult> delete(String sourceName, String id);
+  Future<QueryResult> delete(GetQuery query);
 
   /// Retrieves all elements through the datasource name (collection, table, etc)
   Future<QueryResult> getAll(String sourceName);

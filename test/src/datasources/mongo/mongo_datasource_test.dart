@@ -35,7 +35,13 @@ void main() {
   });
 
   tearDownAll(() async {
-    await sut.delete(collectionName, data["id"]);
+    await sut.delete(
+      GetQuery(
+        sourceName: collectionName,
+        value: data["id"],
+        fieldName: "id",
+      ),
+    );
   });
 
   group("Mongo Datasource: ", () {
@@ -100,7 +106,13 @@ void main() {
       expect(result.success, isTrue);
       expect(result.multiData!.length, equals(2));
 
-      await sut.delete(collectionName, newDocId);
+      await sut.delete(
+        GetQuery(
+          sourceName: collectionName,
+          value: newDocId,
+          fieldName: "id",
+        ),
+      );
     });
 
     test("Should push and merge list data to $collectionName array field",
@@ -213,7 +225,13 @@ void main() {
     });
 
     test("Should remove data from $collectionName", () async {
-      final result = await sut.delete(collectionName, data["id"]);
+      final result = await sut.delete(
+        GetQuery(
+          sourceName: collectionName,
+          value: data["id"],
+          fieldName: "id",
+        ),
+      );
 
       expect(result.success, isTrue);
     });

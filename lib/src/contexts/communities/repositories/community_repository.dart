@@ -161,7 +161,13 @@ class CommunityRepository
     DeleteCommunityInput input,
   ) async {
     try {
-      final result = await _databaseDatasource.delete(sourceName, input.id);
+      final result = await _databaseDatasource.delete(
+        GetQuery(
+          sourceName: sourceName,
+          value: input.id,
+          fieldName: "id",
+        ),
+      );
       if (result.failure) {
         return Left(Exception(result.errorMessage));
       }

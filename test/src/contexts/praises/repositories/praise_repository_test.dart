@@ -58,8 +58,11 @@ void main() {
 
   tearDownAll(() async {
     datasource.delete(
-      sut.sourceName,
-      id,
+      GetQuery(
+        sourceName: "praises",
+        value: id,
+        fieldName: "id",
+      ),
     );
   });
 

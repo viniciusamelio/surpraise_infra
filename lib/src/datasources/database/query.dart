@@ -24,7 +24,7 @@ abstract class Query {
 class GetQuery<T> implements Query {
   GetQuery({
     required this.sourceName,
-    required this.operator,
+    this.operator = FilterOperator.equalsTo,
     required this.value,
     required this.fieldName,
     this.filters,
