@@ -29,6 +29,7 @@ class GetQuery<T> implements Query {
     required this.fieldName,
     this.filters,
     this.singleResult = true,
+    this.select,
   });
 
   @override
@@ -40,6 +41,8 @@ class GetQuery<T> implements Query {
 
   final bool singleResult;
 
+  final String? select;
+
   final List<AggregateFilter>? filters;
 
   GetQuery<T> copyWith({
@@ -49,6 +52,7 @@ class GetQuery<T> implements Query {
     T? value,
     bool? singleResult,
     List<AggregateFilter>? filters,
+    String? select,
   }) {
     return GetQuery<T>(
       sourceName: sourceName ?? this.sourceName,
@@ -57,6 +61,7 @@ class GetQuery<T> implements Query {
       value: value ?? this.value,
       singleResult: singleResult ?? this.singleResult,
       filters: filters ?? this.filters,
+      select: select,
     );
   }
 }
