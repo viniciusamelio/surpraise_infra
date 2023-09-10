@@ -7,7 +7,8 @@ enum FilterOperator {
   lesserThan("<"),
   equalsOrLesserThan("<="),
   notEqualsTo("!="),
-  equalsTo("=");
+  equalsTo("="),
+  inValues("in");
 
   final String value;
   const FilterOperator(this.value);
