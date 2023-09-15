@@ -1,4 +1,3 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:surpraise_backend_dependencies/surpraise_backend_dependencies.dart';
 import 'package:surpraise_core/surpraise_core.dart';
 import 'package:surpraise_infra/src/contexts/praises/mappers/praise_mapper.dart';
@@ -6,6 +5,8 @@ import 'package:surpraise_infra/src/contexts/praises/mappers/praise_mapper.dart'
 import 'package:surpraise_infra/src/datasources/database/database_datasource.dart';
 import 'package:surpraise_infra/src/datasources/database/query.dart';
 import 'package:surpraise_infra/src/datasources/database/result.dart';
+
+import '../../collections.dart';
 
 class PraiseRepository
     implements CreatePraiseRepository, FindPraiseUsersRepository {
@@ -15,7 +16,7 @@ class PraiseRepository
 
   final DatabaseDatasource _datasource;
 
-  String get sourceName => "praises";
+  String get sourceName => praisesCollection;
 
   @override
   Future<Either<Exception, PraiseOutput>> create(PraiseInput input) async {
@@ -25,7 +26,7 @@ class PraiseRepository
       final praiser = await _getUserData(input.praiserId);
       final community = await _datasource.get(
         GetQuery(
-          sourceName: "communities",
+          sourceName: communitiesCollection,
           operator: FilterOperator.equalsTo,
           value: input.commmunityId,
           fieldName: "id",
@@ -36,22 +37,20 @@ class PraiseRepository
         return Left(
           Exception("Praised user not found"),
         );
+      } else if (community.failure || community.multiData!.isEmpty) {
+        return Left(
+          Exception("Community not found"),
+        );
+      } else if (praiser.failure) {
+        return Left(
+          Exception("Praiser not found"),
+        );
       }
 
       final result = await _datasource.save(
         SaveQuery(
           sourceName: sourceName,
-          value: {
-            ...rawPraiseData,
-            "praised": praised.data!,
-            "praiser": praiser.data,
-            "community": community.data != null
-                ? {
-                    "title": community.data?["title"],
-                    "id": community.data?["id"],
-                  }
-                : null,
-          },
+          value: rawPraiseData,
         ),
       );
       if (result.failure) {
@@ -70,7 +69,7 @@ class PraiseRepository
   Future<QueryResult> _getUserData(String userId) {
     return _datasource.get(
       GetQuery(
-        sourceName: "users",
+        sourceName: profilesCollection,
         operator: FilterOperator.equalsTo,
         value: userId,
         fieldName: "id",
