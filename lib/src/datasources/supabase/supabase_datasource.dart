@@ -1,7 +1,6 @@
 import 'package:supabase/supabase.dart';
 
 import '../../../surpraise_infra.dart';
-import 'filter_parser.dart';
 
 typedef Json = Map<String, dynamic>;
 
