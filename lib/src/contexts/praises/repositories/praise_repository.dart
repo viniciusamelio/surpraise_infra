@@ -43,7 +43,7 @@ class PraiseRepository
         );
       } else if (praiser.failure) {
         return Left(
-          Exception("Praiser not found"),
+          Exception("Praiser user not found"),
         );
       }
 
@@ -85,19 +85,21 @@ class PraiseRepository
     try {
       final praised = await _datasource.get(
         GetQuery(
-          sourceName: "users",
+          sourceName: profilesCollection,
           operator: FilterOperator.equalsTo,
           value: praisedId,
           fieldName: "id",
+          select: "id, tag, $communityMembersCollection(community_id)",
         ),
       );
 
       final praiser = await _datasource.get(
         GetQuery(
-          sourceName: "users",
+          sourceName: profilesCollection,
           operator: FilterOperator.equalsTo,
           value: praiserId,
           fieldName: "id",
+          select: "id, tag, $communityMembersCollection(community_id)",
         ),
       );
 
@@ -112,12 +114,20 @@ class PraiseRepository
           praisedDto: PraisedDto(
             tag: praised.data!["tag"],
             communities:
-                ((praised.data!["communities"] ?? []) as List).cast<String>(),
+                ((praised.multiData![0][communityMembersCollection].map(
+                          (e) => e["community_id"],
+                        ) ??
+                        []) as List)
+                    .cast<String>(),
           ),
           praiserDto: PraiserDto(
             tag: praiser.data!["tag"],
             communities:
-                ((praiser.data!["communities"] ?? []) as List).cast<String>(),
+                ((praiser.multiData![0][communityMembersCollection].map(
+                          (e) => e["community_id"],
+                        ) ??
+                        []) as List)
+                    .cast<String>(),
           ),
         ),
       );
