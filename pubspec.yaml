@@ -7,6 +7,7 @@ environment:
   sdk: '>=2.17.7 <3.0.0'
 
 dependencies:
+  supabase: ^1.11.3
   surpraise_backend_dependencies:
     git:
       https://github.com/viniciusamelio/surpraise_backend_dependencies
