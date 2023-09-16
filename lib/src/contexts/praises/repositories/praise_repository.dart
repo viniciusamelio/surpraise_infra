@@ -33,7 +33,7 @@ class PraiseRepository
         ),
       );
 
-      if (praised.data == null || praised.failure) {
+      if (praised.failure || praised.multiData!.isEmpty) {
         return Left(
           Exception("Praised user not found"),
         );
@@ -41,7 +41,7 @@ class PraiseRepository
         return Left(
           Exception("Community not found"),
         );
-      } else if (praiser.failure) {
+      } else if (praiser.failure || praiser.multiData!.isEmpty) {
         return Left(
           Exception("Praiser user not found"),
         );
