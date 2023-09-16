@@ -113,21 +113,21 @@ class PraiseRepository
         FindPraiseUsersDto(
           praisedDto: PraisedDto(
             tag: praised.multiData![0]["tag"],
-            communities:
-                ((praised.multiData![0][communityMembersCollection].map(
-                          (e) => e["community_id"],
-                        ) ??
-                        []) as List)
-                    .cast<String>(),
+            communities: (praised.multiData![0][communityMembersCollection]
+                    .map(
+                      (e) => e["community_id"],
+                    )
+                    .toList() as List)
+                .cast<String>(),
           ),
           praiserDto: PraiserDto(
             tag: praiser.multiData![0]["tag"],
-            communities:
-                ((praiser.multiData![0][communityMembersCollection].map(
-                          (e) => e["community_id"],
-                        ) ??
-                        []) as List)
-                    .cast<String>(),
+            communities: (praiser.multiData![0][communityMembersCollection]
+                    .map(
+                      (e) => e["community_id"],
+                    )
+                    .toList() as List)
+                .cast<String>(),
           ),
         ),
       );
