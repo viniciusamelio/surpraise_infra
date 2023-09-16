@@ -112,7 +112,7 @@ class PraiseRepository
       return Right(
         FindPraiseUsersDto(
           praisedDto: PraisedDto(
-            tag: praised.data!["tag"],
+            tag: praised.multiData![0]["tag"],
             communities:
                 ((praised.multiData![0][communityMembersCollection].map(
                           (e) => e["community_id"],
@@ -121,7 +121,7 @@ class PraiseRepository
                     .cast<String>(),
           ),
           praiserDto: PraiserDto(
-            tag: praiser.data!["tag"],
+            tag: praiser.multiData![0]["tag"],
             communities:
                 ((praiser.multiData![0][communityMembersCollection].map(
                           (e) => e["community_id"],
