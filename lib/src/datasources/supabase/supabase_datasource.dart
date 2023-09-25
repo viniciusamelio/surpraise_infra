@@ -75,6 +75,7 @@ class SupabaseDatasource implements DatabaseDatasource {
         success: true,
         failure: false,
         multiData: result.cast<Json>(),
+        data: result.length == 1 ? result.first as Json : null,
       );
     } catch (e) {
       return QueryResult(
@@ -136,6 +137,7 @@ class SupabaseDatasource implements DatabaseDatasource {
       return QueryResult(
         success: true,
         failure: false,
+        data: result.length == 1 ? result.first as Json : null,
         multiData: result is List<dynamic>
             ? result.cast<Json>()
             : (result.data as List).cast<Json>(),
