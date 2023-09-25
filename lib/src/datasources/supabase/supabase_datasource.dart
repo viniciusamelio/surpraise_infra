@@ -63,7 +63,7 @@ class SupabaseDatasource implements DatabaseDatasource {
             continue;
           }
           sbquery = sbquery.or(
-            "${filter.fieldName}${filterParser(filter.operator)}${filter.value}",
+            "${filter.fieldName}.${filterParser(filter.operator)}.${filter.value}",
           );
         }
       }

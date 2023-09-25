@@ -6,6 +6,8 @@ import 'package:surpraise_infra/src/contexts/users/mappers/user_mapper.dart';
 import 'package:surpraise_infra/src/datasources/database/database_datasource.dart';
 import 'package:surpraise_infra/src/datasources/database/query.dart';
 
+import '../../collections.dart';
+
 class UserRepository
     implements
         CreateUserRepository,
@@ -17,7 +19,7 @@ class UserRepository
 
   final DatabaseDatasource _datasource;
 
-  final String sourceName = "users";
+  final String sourceName = profilesCollection;
 
   @override
   Future<Either<Exception, CreateUserOutput>> create(
