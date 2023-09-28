@@ -31,8 +31,9 @@ class DefaultSettingsRepository implements SettingsRepository {
       );
     }
 
-    if (settingsOrError.data == null && settingsOrError.multiData == null ||
-        settingsOrError.data!.isEmpty) {
+    if (settingsOrError.data == null &&
+        (settingsOrError.multiData == null ||
+            settingsOrError.multiData!.isEmpty)) {
       final newSettingsOrError = await save(
         input: SaveSettingsInput(
           pushNotificationsEnabled: false,
