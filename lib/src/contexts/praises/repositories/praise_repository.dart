@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:surpraise_backend_dependencies/surpraise_backend_dependencies.dart';
 import 'package:surpraise_core/surpraise_core.dart';
 import 'package:surpraise_infra/src/contexts/praises/mappers/praise_mapper.dart';
@@ -5,6 +7,8 @@ import 'package:surpraise_infra/src/contexts/praises/mappers/praise_mapper.dart'
 import 'package:surpraise_infra/src/datasources/database/database_datasource.dart';
 import 'package:surpraise_infra/src/datasources/database/query.dart';
 import 'package:surpraise_infra/src/datasources/database/result.dart';
+
+import "package:http/http.dart" as http;
 
 import '../../collections.dart';
 
@@ -58,6 +62,19 @@ class PraiseRepository
           Exception(result.errorMessage),
         );
       }
+      final url = String.fromEnvironment("NOTIFICATOR_URL");
+      http.post(
+        Uri.parse(url),
+        body: jsonEncode(
+          {
+            "praise": {
+              "praised": praised.multiData![0],
+              "message": input.message,
+              "topic": input.topic,
+            },
+          },
+        ),
+      );
       return Right(
         PraiseOutput(),
       );
