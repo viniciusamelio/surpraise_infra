@@ -63,7 +63,7 @@ class PraiseRepository
         );
       }
       final url = String.fromEnvironment("NOTIFICATOR_URL");
-      http.post(
+      await http.post(
         Uri.parse(url),
         body: jsonEncode(
           {
