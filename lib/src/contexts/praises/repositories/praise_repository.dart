@@ -70,6 +70,7 @@ class PraiseRepository
           {
             "praise": {
               "praised": praised.multiData![0],
+              "praiser": praiser.multiData![0],
               "message": input.message,
               "topic": input.topic,
             },
