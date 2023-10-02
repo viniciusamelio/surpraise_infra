@@ -62,7 +62,8 @@ class PraiseRepository
           Exception(result.errorMessage),
         );
       }
-      final url = String.fromEnvironment("NOTIFICATOR_URL");
+      final url =
+          "https://pyikvsduetfaktrnwwcu.supabase.co/functions/v1/notificator";
       await http.post(
         Uri.parse(url),
         body: jsonEncode(
