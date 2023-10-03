@@ -16,7 +16,7 @@ class DefaultGetNotificationsRepository implements GetNotificationsRepository {
   @override
   Future<Either<Exception, List<GetNotificationOutput>>> get({
     required String userId,
-    int limit = 2,
+    int limit = 20,
     int offset = 0,
   }) async {
     final notificationsOrError = await _datasource.get(
