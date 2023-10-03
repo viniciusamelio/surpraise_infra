@@ -4,5 +4,7 @@ import 'package:surpraise_infra/src/contexts/notifications/boundaries/get_notifi
 abstract class GetNotificationsRepository {
   Future<Either<Exception, List<GetNotificationOutput>>> get({
     required String userId,
+    int limit = 20,
+    int offset = 0,
   });
 }

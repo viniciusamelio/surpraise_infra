@@ -1,5 +1,6 @@
 import 'package:ez_either/ez_either.dart';
 import 'package:surpraise_core/surpraise_core.dart';
+import 'package:surpraise_infra/src/datasources/database/filter.dart';
 
 import '../../../datasources/database/database_datasource.dart';
 import '../../../datasources/database/query.dart';
@@ -15,11 +16,18 @@ class DefaultGetNotificationsRepository implements GetNotificationsRepository {
   @override
   Future<Either<Exception, List<GetNotificationOutput>>> get({
     required String userId,
+    int limit = 20,
+    int offset = 0,
   }) async {
     final notificationsOrError = await _datasource.get(
       GetQuery(
         sourceName: notificationsCollection,
         value: userId,
+        orderBy: OrderFilter(
+          field: "sent_at",
+        ),
+        offset: offset,
+        limit: limit,
         fieldName: "user_id",
       ),
     );
