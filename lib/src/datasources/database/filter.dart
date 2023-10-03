@@ -66,3 +66,17 @@ class OrFilter<T> implements AggregateFilter {
     required this.value,
   });
 }
+
+class OrderFilter {
+  const OrderFilter({
+    required this.field,
+    this.type = OrdinationType.desc,
+  });
+  final String field;
+  final OrdinationType type;
+}
+
+enum OrdinationType {
+  desc,
+  asc,
+}

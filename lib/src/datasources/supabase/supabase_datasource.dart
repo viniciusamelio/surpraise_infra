@@ -68,6 +68,20 @@ class SupabaseDatasource implements DatabaseDatasource {
         }
       }
 
+      if (query.orderBy != null) {
+        sbquery.order(
+          query.orderBy!.field,
+          ascending: query.orderBy!.type == OrdinationType.asc,
+        );
+      }
+      if (query.offset != null) {
+        sbquery.limit(query.offset!);
+      }
+
+      if (query.limit != null) {
+        sbquery.limit(query.limit!);
+      }
+
       final List result = await sbquery.select(
         query.select ?? "*",
       );

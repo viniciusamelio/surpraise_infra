@@ -31,6 +31,9 @@ class GetQuery<T> implements Query {
     this.filters,
     this.singleResult = true,
     this.select,
+    this.orderBy,
+    this.limit,
+    this.offset,
   });
 
   @override
@@ -43,7 +46,9 @@ class GetQuery<T> implements Query {
   final bool singleResult;
 
   final String? select;
-
+  final OrderFilter? orderBy;
+  final int? limit;
+  final int? offset;
   final List<AggregateFilter>? filters;
 
   GetQuery<T> copyWith({
