@@ -75,7 +75,7 @@ class SupabaseDatasource implements DatabaseDatasource {
         );
       }
       if (query.offset != null) {
-        sbquery.limit(query.offset!);
+        sbquery.range(query.offset!, query.offset! + (query.limit ?? 20));
       }
 
       if (query.limit != null) {
