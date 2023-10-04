@@ -183,6 +183,17 @@ class SupabaseDatasource implements DatabaseDatasource {
         sbquery.inFilter(query.fieldName, query.value);
       }
 
+      if (query.filters != null) {
+        for (final filter in query.filters!) {
+          if (filter is OrFilter) continue;
+          if (filter.operator == FilterOperator.equalsTo) {
+            sbquery.eq(filter.fieldName, filter.value);
+          } else if (filter.operator == FilterOperator.inValues) {
+            sbquery.inFilter(filter.fieldName, filter.value);
+          }
+        }
+      }
+
       if (query.orderBy != null) {
         sbquery.order(
           query.orderBy!.field,
