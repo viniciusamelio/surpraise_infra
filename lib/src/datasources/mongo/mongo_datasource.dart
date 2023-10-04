@@ -235,4 +235,9 @@ class MongoDatasource implements DatabaseDatasource {
       await Db(uriString).close();
     }
   }
+
+  @override
+  Stream<QueryResult> watch(GetQuery query) {
+    throw UnimplementedError();
+  }
 }
