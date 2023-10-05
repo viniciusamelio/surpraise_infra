@@ -20,4 +20,7 @@ abstract class DatabaseDatasource {
 
   /// Retrieves all elements through the datasource name (collection, table, etc)
   Future<QueryResult> getAll(String sourceName);
+
+  /// Listens to changes in the database
+  Stream<QueryResult> watch(GetQuery query);
 }

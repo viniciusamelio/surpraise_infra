@@ -169,4 +169,59 @@ class SupabaseDatasource implements DatabaseDatasource {
       );
     }
   }
+
+  @override
+  Stream<QueryResult> watch(GetQuery query) {
+    try {
+      var sbquery = supabase.from(query.sourceName).stream(
+        primaryKey: ["id"],
+      );
+
+      if (query.operator == FilterOperator.equalsTo) {
+        sbquery.eq(query.fieldName, query.value);
+      } else if (query.operator == FilterOperator.inValues) {
+        sbquery.inFilter(query.fieldName, query.value);
+      }
+
+      if (query.filters != null) {
+        for (final filter in query.filters!) {
+          if (filter is OrFilter) continue;
+          if (filter.operator == FilterOperator.equalsTo) {
+            sbquery.eq(filter.fieldName, filter.value);
+          } else if (filter.operator == FilterOperator.inValues) {
+            sbquery.inFilter(filter.fieldName, filter.value);
+          }
+        }
+      }
+
+      if (query.orderBy != null) {
+        sbquery.order(
+          query.orderBy!.field,
+          ascending: query.orderBy!.type == OrdinationType.asc,
+        );
+      }
+
+      if (query.limit != null) {
+        sbquery.limit(query.limit!);
+      }
+
+      return sbquery.map<QueryResult>(
+        (event) => QueryResult(
+          success: true,
+          failure: false,
+          multiData: event,
+          registersAffected: event.length,
+        ),
+      );
+    } catch (e) {
+      return Stream.error(
+        QueryResult(
+          success: false,
+          failure: true,
+          errorMessage: e.toString(),
+          registersAffected: 0,
+        ),
+      );
+    }
+  }
 }
