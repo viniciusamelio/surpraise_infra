@@ -20,7 +20,10 @@ class SupabaseDatasource implements DatabaseDatasource {
       if (query.filters != null) {
         for (var filter in query.filters!) {
           sbQuery = sbQuery.filter(
-              filter.fieldName, filterParser(filter.operator), filter.value);
+            filter.fieldName,
+            filterParser(filter.operator),
+            filter.value,
+          );
         }
       }
 

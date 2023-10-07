@@ -1,7 +1,9 @@
 import 'package:surpraise_backend_dependencies/surpraise_backend_dependencies.dart';
 import 'package:surpraise_core/surpraise_core.dart';
+import 'package:surpraise_infra/src/contexts/collections.dart';
 import 'package:surpraise_infra/src/contexts/communities/mappers/community_mapper.dart';
 import 'package:surpraise_infra/src/datasources/database/database_datasource.dart';
+import 'package:surpraise_infra/src/datasources/database/filter.dart';
 import 'package:surpraise_infra/src/datasources/database/query.dart';
 
 class CommunityRepository
@@ -16,7 +18,7 @@ class CommunityRepository
 
   final DatabaseDatasource _databaseDatasource;
 
-  String get sourceName => "communities";
+  String get sourceName => communitiesCollection;
 
   @override
   Future<Either<Exception, CreateCommunityOutput>> createCommunity(
@@ -120,30 +122,21 @@ class CommunityRepository
     RemoveMembersInput input,
   ) async {
     try {
-      final members = input.memberIds
-          .map((e) => {
-                "member_id": e,
-                "role": "member",
-              })
-          .toList();
-      final result = await _databaseDatasource.pop(
-        PopQuery(
+      final result = await _databaseDatasource.delete(
+        GetQuery(
           sourceName: sourceName,
-          value: members,
-          id: input.communityId,
-          field: "members",
+          value: input.members.map((e) => e.id).toList(),
+          operator: FilterOperator.inValues,
+          fieldName: "member_id",
+          filters: [
+            AndFilter(
+              fieldName: "community_id",
+              operator: FilterOperator.equalsTo,
+              value: input.communityId,
+            ),
+          ],
         ),
       );
-      for (final memberId in input.memberIds) {
-        await _databaseDatasource.pop(
-          PopQuery(
-            sourceName: "users",
-            value: input.communityId,
-            id: memberId,
-            field: "communities",
-          ),
-        );
-      }
 
       if (result.failure) {
         return Left(Exception(result.errorMessage));
