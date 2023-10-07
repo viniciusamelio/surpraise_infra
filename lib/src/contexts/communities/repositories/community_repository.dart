@@ -138,11 +138,11 @@ class CommunityRepository
     RemoveMembersInput input,
   ) async {
     try {
+      // For now it will only remove one member at once
       final result = await _databaseDatasource.delete(
         GetQuery(
           sourceName: communityMembersCollection,
-          value: input.members.map((e) => e.id).toList(),
-          operator: FilterOperator.inValues,
+          value: input.members.first.id,
           fieldName: "member_id",
           filters: [
             AndFilter(
