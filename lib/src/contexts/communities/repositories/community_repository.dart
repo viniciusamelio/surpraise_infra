@@ -81,7 +81,7 @@ class CommunityRepository
       );
       if (result.failure) {
         return Left(Exception(result.errorMessage));
-      } else if (result.data == null) {
+      } else if (result.data == null || result.multiData == null) {
         return Left(
           Exception("Could not find community through given id"),
         );
