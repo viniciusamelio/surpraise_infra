@@ -41,6 +41,6 @@ String filterParser(FilterOperator operator) {
     case FilterOperator.notEqualsTo:
       return "neq";
     case FilterOperator.inValues:
-      return "in";
+      return "cs";
   }
 }
