@@ -140,7 +140,7 @@ class CommunityRepository
     try {
       final result = await _databaseDatasource.delete(
         GetQuery(
-          sourceName: sourceName,
+          sourceName: communityMembersCollection,
           value: input.members.map((e) => e.id).toList(),
           operator: FilterOperator.inValues,
           fieldName: "member_id",
