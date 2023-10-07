@@ -8,14 +8,6 @@ abstract class CommunityMapper {
         "imageUrl": input.imageUrl,
         "description": input.description,
         "title": input.title,
-        "plan_member_limit": input.planMemberLimit,
-        "members": [
-          {
-            "member_id": input.ownerId,
-            "community_id": input.id,
-            "role": "owner",
-          }
-        ]
       };
 
   static CreateCommunityOutput createOutputFromMap(Map<String, dynamic> map) =>

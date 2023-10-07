@@ -1,16 +1,12 @@
 import 'package:faker/faker.dart';
-import 'package:mongo_dart/mongo_dart.dart';
 import 'package:surpraise_core/surpraise_core.dart';
 import 'package:surpraise_infra/src/contexts/communities/repositories/community_repository.dart';
-import 'package:surpraise_infra/src/datasources/mongo/mongo_datasource.dart';
-import 'package:surpraise_infra/src/external/mongo/mongo.dart';
 import 'package:test/test.dart';
 
-import '../../../../test_settings.dart';
+import '../../../../fake.dart';
 
 void main() {
   late CommunityRepository sut;
-  late Db db;
   group("Community Repository: ", () {
     final CreateCommunityInput createCommunityInput = CreateCommunityInput(
       description: faker.lorem.words(3).toString(),
@@ -32,20 +28,9 @@ void main() {
     ];
 
     setUpAll(() async {
-      db = await Db.create(TestSettings.dbConnection);
-      await db.open();
       sut = CommunityRepository(
-        databaseDatasource: MongoDatasource(
-          Mongo(
-            db,
-          ),
-          TestSettings.dbConnection,
-        ),
+        databaseDatasource: FakeDatasource(),
       );
-    });
-
-    tearDownAll(() async {
-      await db.collection(sut.sourceName).drop();
     });
 
     test('Sut should create a community', () async {
@@ -94,7 +79,19 @@ void main() {
       final result = await sut.removeMembers(
         RemoveMembersInput(
           communityId: createCommunityInput.id!,
-          memberIds: newMembers.map((e) => e.idMember).toList(),
+          reason: "'Cause i wanted",
+          moderator: MemberDto(
+            id: faker.guid.guid(),
+            role: "moderator",
+          ),
+          members: newMembers
+              .map(
+                (e) => MemberDto(
+                  id: e.idMember,
+                  role: "member",
+                ),
+              )
+              .toList(),
         ),
       );
       final getResult = await sut.find(FindCommunityInput(
