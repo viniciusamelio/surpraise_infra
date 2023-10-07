@@ -75,6 +75,8 @@ class CommunityRepository
           operator: FilterOperator.equalsTo,
           value: input.id,
           fieldName: "id",
+          select:
+              "id, title, description, owner_id, $communityMembersCollection(member_id, community_id, role)",
         ),
       );
       if (result.failure) {

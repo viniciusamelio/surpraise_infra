@@ -1,5 +1,7 @@
 import 'package:surpraise_core/surpraise_core.dart';
 
+import '../../collections.dart';
+
 abstract class CommunityMapper {
   static Map<String, dynamic> createMapFromInput(CreateCommunityInput input) =>
       {
@@ -32,7 +34,7 @@ abstract class CommunityMapper {
         ownerId: map["owner_id"],
         description: map["description"],
         title: map["title"],
-        members: (map["members"] as List).map((e) {
+        members: (map[communityMembersCollection] as List).map((e) {
           if (!e.containsKey("community_id")) {
             e["community_id"] = map["id"];
           }
