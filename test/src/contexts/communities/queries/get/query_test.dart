@@ -1,10 +1,8 @@
 import 'package:faker/faker.dart';
-import 'package:mongo_dart/mongo_dart.dart';
 import 'package:surpraise_core/surpraise_core.dart';
+import 'package:surpraise_infra/src/contexts/collections.dart';
 import 'package:surpraise_infra/src/contexts/communities/queries/queries.dart';
 import 'package:surpraise_infra/src/contexts/communities/repositories/community_repository.dart';
-import 'package:surpraise_infra/src/datasources/mongo/mongo_datasource.dart';
-import 'package:surpraise_infra/src/external/mongo/mongo.dart';
 import 'package:surpraise_infra/src/query/query.dart';
 import 'package:test/test.dart';
 
@@ -12,7 +10,6 @@ import '../../../../../test_settings.dart';
 
 void main() {
   late GetCommunityQuery sut;
-  late Db db;
   late CreateCommunityRepository communityRepository;
 
   final String communityId = faker.guid.guid();
@@ -21,7 +18,9 @@ void main() {
     await communityRepository.createCommunity(
       CreateCommunityInput(
         description: faker.lorem.words(3).toString(),
-        ownerId: faker.guid.guid(),
+        ownerId: await supabaseClient().then(
+          (client) => client.auth.currentUser!.id,
+        ),
         title: faker.lorem.word(),
         id: id,
         imageUrl: faker.lorem.word(),
@@ -30,20 +29,22 @@ void main() {
   }
 
   group("GetCommunityQuery: ", () {
-    setUp(() async {
-      db = Db(TestSettings.dbConnection);
-      await db.open();
-      final mongo = Mongo(db);
+    setUpAll(() async {
       sut = GetCommunityQuery(
-        databaseDatasource: MongoDatasource(mongo, TestSettings.dbConnection),
+        databaseDatasource: await supabaseDatasource(),
       );
       communityRepository = CommunityRepository(
-        databaseDatasource: MongoDatasource(mongo, TestSettings.dbConnection),
+        databaseDatasource: await supabaseDatasource(),
       );
     });
 
     tearDownAll(() async {
-      await db.collection("communities").drop();
+      await supabaseClient().then(
+        (client) async => client.from(communitiesCollection).delete().neq(
+              "id",
+              faker.guid.guid(),
+            ),
+      );
     });
 
     test("sut should retrieve found community", () async {
@@ -58,13 +59,13 @@ void main() {
       expect(communityOrError.isRight(), isTrue);
       communityOrError.fold((l) => null, (r) {
         expect(
-          r.value["id"],
+          r.value.id,
           equals(communityId),
         );
       });
     });
 
-    test("sut should returns an error when community is not found", () async {
+    test("sut should return an error when community is not found", () async {
       await createCommunity(faker.guid.guid());
 
       final communityOrError = await sut(

@@ -1,11 +1,9 @@
 import 'package:faker/faker.dart';
-import 'package:mongo_dart/mongo_dart.dart';
 import 'package:surpraise_core/surpraise_core.dart';
+import 'package:surpraise_infra/src/contexts/collections.dart';
 import 'package:surpraise_infra/src/contexts/communities/queries/queries.dart';
 import 'package:surpraise_infra/src/contexts/communities/repositories/community_repository.dart';
 import 'package:surpraise_infra/src/contexts/users/repositories/user_repository.dart';
-import 'package:surpraise_infra/src/datasources/mongo/mongo_datasource.dart';
-import 'package:surpraise_infra/src/external/mongo/mongo.dart';
 import 'package:test/test.dart';
 
 import '../../../../../test_settings.dart';
@@ -13,26 +11,22 @@ import '../../../../../test_settings.dart';
 void main() {
   late GetCommunitiesByUserQuery sut;
   late CreateUserRepository userRepository;
-  late Db db;
   late CreateCommunityRepository repository;
 
-  final String userId = faker.guid.guid();
+  late final String userId;
 
   group("GetCommunitiesByUserQuery: ", () {
-    setUp(() async {
-      db = await Db.create(TestSettings.dbConnection);
-      final mongo = Mongo(db);
-      await db.open();
+    setUpAll(() async {
       sut = GetCommunitiesByUserQuery(
-        databaseDatasource: MongoDatasource(mongo, TestSettings.dbConnection),
+        databaseDatasource: await supabaseDatasource(),
       );
       repository = CommunityRepository(
-        databaseDatasource: MongoDatasource(mongo, TestSettings.dbConnection),
+        databaseDatasource: await supabaseDatasource(),
       );
       userRepository = UserRepository(
-        databaseDatasource: MongoDatasource(mongo, TestSettings.dbConnection),
+        databaseDatasource: await supabaseDatasource(),
       );
-
+      userId = (await supabaseClient()).auth.currentUser!.id;
       await userRepository.create(
         CreateUserInput(
           tag: "@testing-user",
@@ -43,19 +37,23 @@ void main() {
       );
     });
 
-    tearDownAll(() async {
-      await db.collection("communities").drop();
-      await db.collection("users").drop();
+    tearDown(() async {
+      await supabaseClient().then(
+        (client) async => client.from(communitiesCollection).delete().neq(
+              "id",
+              faker.guid.guid(),
+            ),
+      );
     });
 
     test("sut should return all communities that given user is owner of",
         () async {
       await createCommunity(repository, userId);
       await createCommunity(repository, userId);
-      await createCommunity(repository, faker.guid.guid());
+      await createCommunity(repository, fakeUserId);
 
       final communitiesOrError = await sut(
-        GetCommunitiesByUserInput(id: userId, asOwner: true),
+        GetCommunitiesByUserInput(id: userId),
       );
 
       expect(communitiesOrError.isRight(), isTrue);
@@ -69,12 +67,12 @@ void main() {
 
     test("sut should return all communities that given user is member of",
         () async {
-      await createAndAddMember(repository, faker.guid.guid(), userId);
-      await createAndAddMember(repository, faker.guid.guid(), userId);
-      await createAndAddMember(repository, faker.guid.guid(), userId);
+      await createAndAddMember(repository, fakeUserId, userId);
+      await createAndAddMember(repository, fakeUserId, userId);
+      await createAndAddMember(repository, fakeUserId, userId);
 
       final communitiesOrError = await sut(
-        GetCommunitiesByUserInput(id: userId, asOwner: false),
+        GetCommunitiesByUserInput(id: userId),
       );
 
       expect(communitiesOrError.isRight(), isTrue);
@@ -89,8 +87,8 @@ void main() {
     test(
         "sut should return all communities that given user is either member or owner of",
         () async {
-      await createAndAddMember(repository, faker.guid.guid(), userId);
-      await createAndAddMember(repository, faker.guid.guid(), userId);
+      await createAndAddMember(repository, fakeUserId, userId);
+      await createAndAddMember(repository, fakeUserId, userId);
       await createCommunity(repository, userId);
       await createCommunity(repository, userId);
 
@@ -104,19 +102,19 @@ void main() {
       communitiesOrError.fold((l) => null, (r) {
         expect(
           r.value.length,
-          equals(9),
+          equals(4),
         );
       });
     });
   });
 }
 
-Future<String> createCommunity(
+Future<CreateCommunityOutput> createCommunity(
   CreateCommunityRepository repository,
   String ownerId,
 ) async {
   final String id = faker.guid.guid();
-  await repository.createCommunity(
+  final community = await repository.createCommunity(
     CreateCommunityInput(
       description: faker.lorem.words(2).toString(),
       ownerId: ownerId,
@@ -125,7 +123,7 @@ Future<String> createCommunity(
       imageUrl: faker.lorem.word(),
     ),
   );
-  return id;
+  return community.fold((left) => null, (right) => right)!;
 }
 
 Future<void> createAndAddMember(
@@ -133,5 +131,15 @@ Future<void> createAndAddMember(
   String ownerId,
   String memberId,
 ) async {
-  await createCommunity(repository, ownerId);
+  final community = await createCommunity(repository, ownerId);
+  await supabaseClient().then(
+    (client) async => client.from(communityMembersCollection).insert(
+      {
+        "community_id": community.id,
+        "active": true,
+        "role": "member",
+        "member_id": memberId,
+      },
+    ),
+  );
 }

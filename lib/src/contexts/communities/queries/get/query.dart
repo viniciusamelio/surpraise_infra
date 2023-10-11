@@ -1,3 +1,6 @@
+import 'package:surpraise_infra/src/contexts/communities/dtos/dtos.dart';
+
+import '../../../collections.dart';
 import 'input.dart';
 import 'output.dart';
 
@@ -19,32 +22,33 @@ class GetCommunityQuery implements DataQuery<GetCommunityInput> {
 
   @override
   Future<Either<QueryError, QueryOutput>> call(GetCommunityInput input) async {
-    final communityOrError = await databaseDatasource.get(
+    final communities = await databaseDatasource.get(
       GetQuery(
-        sourceName: "communities",
-        operator: FilterOperator.equalsTo,
+        sourceName: communityMembersCollection,
         value: input.id,
-        fieldName: "id",
+        fieldName: "community_id",
+        select: "$communitiesCollection(*), role",
       ),
     );
-
-    if (communityOrError.failure) {
-      if (communityOrError.errorMessage!.contains("No element")) {
-        return Left(
-          QueryError(
-            "User not found",
-            404,
-          ),
-        );
-      }
+    if (communities.failure) {
       return Left(
-        QueryError(communityOrError.errorMessage!),
+        QueryError(
+          "Something went wrong querying community with id ${input.id}",
+        ),
+      );
+    } else if (communities.data == null &&
+        (communities.multiData == null || communities.multiData!.isEmpty)) {
+      return Left(
+        QueryError(
+          "Community with id ${input.id} not found",
+          404,
+        ),
       );
     }
 
     return Right(
       GetCommunityOutput(
-        value: communityOrError.data!,
+        value: communityOutputFromMap(communities.multiData![0]),
       ),
     );
   }
