@@ -25,7 +25,11 @@ class GetPraisesByCommunityInput implements QueryInput {
 class GetPraiseInput implements QueryInput {
   GetPraiseInput({
     required this.id,
+    this.limit = 10,
+    this.offset = 0,
   });
 
   final String id;
+  final int limit;
+  final int offset;
 }

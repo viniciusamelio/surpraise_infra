@@ -1,4 +1,5 @@
 import 'package:supabase/supabase.dart';
+import 'package:surpraise_infra/surpraise_infra.dart';
 
 abstract class TestSettings {
   static String dbConnection = "mongodb://127.0.0.1:27017/surpraise";
@@ -14,4 +15,9 @@ Future<SupabaseClient> supabaseClient() async {
   await client.auth
       .signInWithPassword(password: "12345678", email: "fake@fake.com");
   return client;
+}
+
+Future<SupabaseDatasource> supabaseDatasource() async {
+  final client = await supabaseClient();
+  return SupabaseDatasource(supabase: client);
 }

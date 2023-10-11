@@ -21,7 +21,7 @@ Future<void> addCommunityMember({
   );
 }
 
-Future<void> createPraise(
+Future<String> createPraise(
   CreatePraiseRepository repository,
   String communityId,
 ) async {
@@ -40,7 +40,7 @@ Future<void> createPraise(
       email: faker.internet.email(),
     ),
   );
-
+  final id = faker.guid.guid();
   await repository.create(
     PraiseInput(
       commmunityId: communityId,
@@ -49,6 +49,8 @@ Future<void> createPraise(
       praiserId:
           await supabaseClient().then((value) => value.auth.currentUser!.id),
       topic: "#kind",
-    )..id = faker.guid.guid(),
+    )..id = id,
   );
+
+  return id;
 }
