@@ -25,16 +25,16 @@ class GetUserByTagQuery implements DataQuery<GetUserByTagQueryInput> {
     );
 
     if (result.failure) {
-      if (result.errorMessage!.contains("No element")) {
-        return Left(
-          QueryError(
-            "User not found",
-            404,
-          ),
-        );
-      }
       return Left(
         QueryError(result.errorMessage!),
+      );
+    } else if (result.data == null &&
+        (result.multiData == null || result.multiData!.isEmpty)) {
+      return Left(
+        QueryError(
+          "User not found",
+          404,
+        ),
       );
     }
 
