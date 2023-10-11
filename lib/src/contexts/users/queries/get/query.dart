@@ -1,4 +1,5 @@
 import 'package:surpraise_backend_dependencies/surpraise_backend_dependencies.dart';
+import 'package:surpraise_infra/src/contexts/collections.dart';
 import 'package:surpraise_infra/src/contexts/users/queries/get/input.dart';
 import 'package:surpraise_infra/src/contexts/users/queries/get/output.dart';
 import 'package:surpraise_infra/src/datasources/database/database_datasource.dart';
@@ -19,7 +20,7 @@ class GetUserQuery implements DataQuery<GetUserQueryInput> {
   Future<Either<QueryError, QueryOutput>> call(GetUserQueryInput input) async {
     final result = await databaseDatasource.get(
       GetQuery(
-        sourceName: "users",
+        sourceName: profilesCollection,
         operator: FilterOperator.equalsTo,
         value: input.id,
         fieldName: "id",
@@ -27,16 +28,16 @@ class GetUserQuery implements DataQuery<GetUserQueryInput> {
     );
 
     if (result.failure) {
-      if (result.errorMessage!.contains("No element")) {
-        return Left(
-          QueryError(
-            "User not found",
-            404,
-          ),
-        );
-      }
       return Left(
         QueryError(result.errorMessage!),
+      );
+    } else if (result.data == null &&
+        (result.multiData == null || result.multiData!.isEmpty)) {
+      return Left(
+        QueryError(
+          "User not found",
+          404,
+        ),
       );
     }
 

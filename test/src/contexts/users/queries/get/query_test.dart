@@ -1,11 +1,9 @@
 import 'package:faker/faker.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:mongo_dart/mongo_dart.dart';
 import 'package:surpraise_core/surpraise_core.dart';
 import 'package:surpraise_infra/src/contexts/users/queries/get/query.dart';
 import 'package:surpraise_infra/src/contexts/users/repositories/user_repository.dart';
-import 'package:surpraise_infra/src/datasources/mongo/mongo_datasource.dart';
-import 'package:surpraise_infra/src/external/mongo/mongo.dart';
+import 'package:surpraise_infra/src/datasources/datasources.dart';
 import 'package:surpraise_infra/src/query/query.dart';
 import 'package:test/test.dart';
 
@@ -16,21 +14,21 @@ class MockIdService extends Mock implements IdService {}
 void main() {
   group("Get User Query: ", () {
     late GetUserQuery sut;
-    late Db db;
     late CreateUserUsecase createUserUsecase;
     late MockIdService mockIdService;
 
-    final String inputId = faker.guid.guid();
+    late String inputId;
+
+    setUpAll(() async {
+      inputId =
+          await supabaseClient().then((value) => value.auth.currentUser!.id);
+    });
 
     setUp(() async {
-      db = await Db.create(TestSettings.dbConnection);
       mockIdService = MockIdService();
-      await db.open();
-      final datasource = MongoDatasource(
-        Mongo(
-          db,
-        ),
-        TestSettings.dbConnection,
+
+      final datasource = SupabaseDatasource(
+        supabase: await supabaseClient(),
       );
       createUserUsecase = DbCreateUserUsecase(
         createUserRepository: UserRepository(
@@ -50,15 +48,12 @@ void main() {
       );
       await createUserUsecase(
         CreateUserInput(
-          tag: "@mock",
+          tag: "@${faker.internet.userName()}",
           name: faker.person.name(),
           email: faker.internet.email(),
+          id: inputId,
         ),
       );
-    });
-
-    tearDown(() async {
-      await db.collection("users").drop();
     });
 
     test("Sut should return found user", () async {
@@ -81,7 +76,7 @@ void main() {
     test("Sut should return not found error", () async {
       final result = await sut(
         GetUserQueryInput(
-          id: "randomIdPass${faker.guid.guid()}",
+          id: faker.guid.guid(),
         ),
       );
 

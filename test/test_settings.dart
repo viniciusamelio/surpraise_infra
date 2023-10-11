@@ -10,9 +10,7 @@ const supabaseKey =
 
 Future<SupabaseClient> supabaseClient() async {
   final client = SupabaseClient(supabaseUrl, supabaseKey);
-  await client.auth.signInWithPassword(
-    password: "12345678",
-    email: "fake@fake.com",
-  );
+  await client.auth
+      .signInWithPassword(password: "12345678", email: "fake@fake.com");
   return client;
 }
