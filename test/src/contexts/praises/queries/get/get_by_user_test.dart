@@ -1,45 +1,30 @@
 import 'package:faker/faker.dart';
-import 'package:mongo_dart/mongo_dart.dart';
 import 'package:surpraise_core/surpraise_core.dart';
+import 'package:surpraise_infra/src/contexts/collections.dart';
 import 'package:surpraise_infra/surpraise_infra.dart';
 import 'package:test/test.dart';
 
 import '../../../../../test_settings.dart';
 
 void main() {
-  late GetPraisesByUserQuery sut;
-  late Db db;
-  late CreatePraiseRepository repository;
+  late final GetReceivedPraisesQuery sut;
+  late final CreatePraiseRepository repository;
+  late final CommunityRepository communityRepository;
 
   late String userId;
   late String anotherPraisingUserId;
-  group("GetPraisesByUserQuery: ", () {
-    setUp(() async {
-      db = await Db.create(TestSettings.dbConnection);
-      final mongo = Mongo(db);
-      await db.open();
-      sut = GetPraisesByUserQuery(
-        databaseDatasource: MongoDatasource(mongo, TestSettings.dbConnection),
-      );
-      repository = PraiseRepository(
-        datasource: MongoDatasource(mongo, TestSettings.dbConnection),
-      );
-    });
+  group("GetReceivedPraisesQuery: ", () {
+    setUp(() async {});
 
     setUpAll(() async {
-      db = await Db.create(TestSettings.dbConnection);
-      final mongo = Mongo(db);
-      await db.open();
-
       final CreateUserRepository userRepository = UserRepository(
-        databaseDatasource: MongoDatasource(
-          mongo,
-          TestSettings.dbConnection,
-        ),
+        databaseDatasource: await supabaseDatasource(),
       );
 
-      final praisedId = faker.guid.guid();
-      anotherPraisingUserId = faker.guid.guid();
+      final praisedId = await supabaseClient().then(
+        (value) => value.auth.currentUser!.id,
+      );
+      anotherPraisingUserId = fakeUserId;
       await userRepository.create(
         CreateUserInput(
           id: praisedId,
@@ -58,117 +43,121 @@ void main() {
       );
 
       userId = praisedId;
+
+      sut = GetReceivedPraisesQuery(
+        databaseDatasource: await supabaseDatasource(),
+      );
+      repository = PraiseRepository(
+        datasource: await supabaseDatasource(),
+      );
+      communityRepository = CommunityRepository(
+        databaseDatasource: await supabaseDatasource(),
+      );
     });
 
     tearDownAll(() async {
-      await db.collection("praises").drop();
+      await supabaseClient().then(
+        (value) => value.from(praisesCollection).delete().neq(
+              "id",
+              faker.guid.guid(),
+            ),
+      );
     });
 
     test(
-      "Sut should retrieve all praises (sent and received) when input.asPraiser is null",
+      "Sut should return received praises",
       () async {
-        for (var i = 0; i < 3; i++) {
-          await createPraiseAsPraised(repository, userId);
-        }
-        for (var i = 0; i < 3; i++) {
-          await createPraiseAsPraiser(
-            repository,
-            userId,
-            anotherPraisingUserId,
-          );
-        }
+        await createPraiseAsPraised(
+          repository,
+          communityRepository,
+          userId,
+        );
+        await createPraiseAsPraised(
+          repository,
+          communityRepository,
+          userId,
+        );
 
-        final praisesOrError = await sut(
+        final result = await sut(
           GetPraisesByUserInput(
             id: userId,
-            asPraiser: null,
           ),
         );
 
-        expect(praisesOrError.fold((l) => l, (r) => r), isA<QueryOutput>());
-        praisesOrError.fold((l) => null, (r) {
+        expect(result.isRight(), isTrue);
+        result.fold((l) => null, (r) {
           expect(
             r.value.length,
-            equals(6),
+            equals(2),
           );
         });
       },
     );
 
-    test("sut should retrieve only sent praises when input.asPraiser is true",
-        () async {
-      await createPraiseAsPraiser(
-        repository,
-        userId,
-        anotherPraisingUserId,
-      );
-
-      final praisesOrError = await sut(
-        GetPraisesByUserInput(
-          id: userId,
-          asPraiser: true,
-        ),
-      );
-
-      expect(praisesOrError.fold((l) => l, (r) => r), isA<QueryOutput>());
-      praisesOrError.fold((l) => null, (r) {
-        expect(
-          r.value.length,
-          equals(4),
+    test(
+      "Sut should return not found error when member has received no praises",
+      () async {
+        await createPraiseAsPraised(
+          repository,
+          communityRepository,
+          userId,
         );
-      });
-    });
+        await createPraiseAsPraised(
+          repository,
+          communityRepository,
+          userId,
+        );
+
+        final result = await sut(
+          GetPraisesByUserInput(
+            id: anotherPraisingUserId,
+          ),
+        );
+
+        expect(result.isRight(), isFalse);
+        expect(result.fold((left) => left, (right) => null), isA<QueryError>());
+        expect(result.fold((left) => left.code, (right) => null), equals(404));
+      },
+    );
 
     test(
-        "sut should retrieve only received praises when input.asPraiser is false",
-        () async {
-      await createPraiseAsPraised(repository, userId);
-      await createPraiseAsPraised(repository, userId);
-
-      final praisesOrError = await sut(
-        GetPraisesByUserInput(
-          id: userId,
-          asPraiser: false,
-        ),
-      );
-
-      expect(praisesOrError.fold((l) => l, (r) => r), isA<QueryOutput>());
-      praisesOrError.fold((l) => null, (r) {
-        expect(
-          r.value.length,
-          equals(5),
+      "Sut should return not found error when querying unexisting member",
+      () async {
+        final result = await sut(
+          GetPraisesByUserInput(
+            id: faker.guid.guid(),
+          ),
         );
-      });
-    });
-  });
-}
 
-Future<void> createPraiseAsPraiser(
-  CreatePraiseRepository repository,
-  String userId,
-  String anotherPraisingUserId,
-) async {
-  await repository.create(
-    PraiseInput(
-      commmunityId: faker.guid.guid(),
-      message: faker.lorem.words(7).toString(),
-      praisedId: anotherPraisingUserId,
-      praiserId: userId,
-      topic: "#kind",
-    )..id = faker.guid.guid(),
-  );
+        expect(result.isRight(), isFalse);
+        expect(result.fold((left) => left, (right) => null), isA<QueryError>());
+        expect(result.fold((left) => left.code, (right) => null), equals(404));
+      },
+    );
+  });
 }
 
 Future<void> createPraiseAsPraised(
   CreatePraiseRepository repository,
+  CreateCommunityRepository communityRepository,
   String userId,
 ) async {
+  final communityId = faker.guid.guid();
+  await communityRepository.createCommunity(
+    CreateCommunityInput(
+      description: faker.lorem.words(2).join(""),
+      ownerId: fakeUserId,
+      title: faker.lorem.word(),
+      imageUrl: faker.internet.httpsUrl(),
+      id: communityId,
+    ),
+  );
   await repository.create(
     PraiseInput(
-      commmunityId: faker.guid.guid(),
+      commmunityId: communityId,
       message: faker.lorem.words(7).toString(),
       praisedId: userId,
-      praiserId: faker.guid.guid(),
+      praiserId: fakeUserId,
       topic: "#kind",
     )..id = faker.guid.guid(),
   );

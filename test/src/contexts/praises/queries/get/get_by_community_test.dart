@@ -32,8 +32,6 @@ void main() {
       );
       communityId = community.fold((left) => "", (right) => right.id);
       await addCommunityMember(communityId: communityId, userId: fakeUserId);
-    });
-    setUp(() async {
       sut = GetPraisesByCommunityQuery(
         databaseDatasource: SupabaseDatasource(
           supabase: await supabaseClient(),

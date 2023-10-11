@@ -3,11 +3,13 @@ import 'package:surpraise_infra/src/query/query.dart';
 class GetPraisesByUserInput implements QueryInput {
   GetPraisesByUserInput({
     required this.id,
-    required this.asPraiser,
+    this.limit = 20,
+    this.offset = 0,
   });
 
   final String id;
-  final bool? asPraiser;
+  final int limit;
+  final int offset;
 }
 
 class GetPraisesByCommunityInput implements QueryInput {
