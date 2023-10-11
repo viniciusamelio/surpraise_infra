@@ -1,5 +1,6 @@
 import 'package:surpraise_backend_dependencies/surpraise_backend_dependencies.dart';
 import 'package:surpraise_infra/src/contexts/collections.dart';
+import 'package:surpraise_infra/src/contexts/users/dtos/dtos.dart';
 import 'package:surpraise_infra/src/contexts/users/queries/get/input.dart';
 import 'package:surpraise_infra/src/contexts/users/queries/get/output.dart';
 import 'package:surpraise_infra/src/datasources/database/database_datasource.dart';
@@ -17,7 +18,8 @@ class GetUserQuery implements DataQuery<GetUserQueryInput> {
   final DatabaseDatasource databaseDatasource;
 
   @override
-  Future<Either<QueryError, QueryOutput>> call(GetUserQueryInput input) async {
+  Future<Either<QueryError, QueryOutput<GetUserDto>>> call(
+      GetUserQueryInput input) async {
     final result = await databaseDatasource.get(
       GetQuery(
         sourceName: profilesCollection,
@@ -43,7 +45,12 @@ class GetUserQuery implements DataQuery<GetUserQueryInput> {
 
     return Right(
       GetUserQueryOutput(
-        value: result.data!,
+        value: GetUserDto(
+          id: result.multiData![0]["id"],
+          tag: result.multiData![0]["tag"],
+          name: result.multiData![0]["name"],
+          email: result.multiData![0]["email"],
+        ),
       ),
     );
   }

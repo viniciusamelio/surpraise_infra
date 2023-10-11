@@ -1,10 +1,11 @@
+import 'package:surpraise_infra/src/contexts/users/dtos/dtos.dart';
 import 'package:surpraise_infra/src/query/query.dart';
 
-class GetUserQueryOutput implements QueryOutput<Map<String, dynamic>> {
+class GetUserQueryOutput implements QueryOutput<GetUserDto> {
   GetUserQueryOutput({
     required this.value,
   });
 
   @override
-  final Map<String, dynamic> value;
+  final GetUserDto value;
 }

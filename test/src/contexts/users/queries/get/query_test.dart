@@ -67,7 +67,7 @@ void main() {
       expect(
         result.fold(
           (l) => null,
-          (r) => r.value["id"],
+          (r) => r.value.id,
         ),
         equals(inputId),
       );

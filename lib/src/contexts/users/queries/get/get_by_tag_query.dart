@@ -1,5 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:ez_either/ez_either.dart';
+import 'package:surpraise_infra/src/contexts/collections.dart';
+import 'package:surpraise_infra/src/contexts/users/dtos/dtos.dart';
 
 import '../../../../../surpraise_infra.dart';
 
@@ -11,12 +13,12 @@ class GetUserByTagQuery implements DataQuery<GetUserByTagQueryInput> {
   final DatabaseDatasource databaseDatasource;
 
   @override
-  Future<Either<QueryError, QueryOutput>> call(
+  Future<Either<QueryError, QueryOutput<GetUserDto>>> call(
     GetUserByTagQueryInput input,
   ) async {
     final result = await databaseDatasource.get(
       GetQuery(
-        sourceName: "users",
+        sourceName: profilesCollection,
         operator: FilterOperator.equalsTo,
         value: input.tag,
         fieldName: "tag",
@@ -39,7 +41,12 @@ class GetUserByTagQuery implements DataQuery<GetUserByTagQueryInput> {
 
     return Right(
       GetUserQueryOutput(
-        value: result.data!,
+        value: GetUserDto(
+          id: result.multiData![0]["id"],
+          tag: result.multiData![0]["tag"],
+          name: result.multiData![0]["name"],
+          email: result.multiData![0]["email"],
+        ),
       ),
     );
   }
