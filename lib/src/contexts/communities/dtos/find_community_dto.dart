@@ -20,10 +20,10 @@ class CommunityOutput {
 
 CommunityOutput communityOutputFromMap(Map<String, dynamic> json) =>
     CommunityOutput(
-      id: json["community"]["id"],
-      ownerId: json["community"]["owner_id"],
-      description: json["community"]["description"],
-      title: json["community"]["title"],
-      image: json["community"]["imageUrl"],
+      id: json["id"],
+      ownerId: json["owner_id"],
+      description: json["description"],
+      title: json["title"],
+      image: json["imageUrl"],
       role: Role.fromString(json["role"]),
     );

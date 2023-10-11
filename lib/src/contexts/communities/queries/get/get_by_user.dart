@@ -2,7 +2,6 @@ import 'package:surpraise_backend_dependencies/surpraise_backend_dependencies.da
 
 import '../../../../surpraise_infra_base.dart';
 import '../../../collections.dart';
-import '../../dtos/dtos.dart';
 
 export 'input.dart';
 export 'output.dart';
