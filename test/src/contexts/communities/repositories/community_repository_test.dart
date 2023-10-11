@@ -1,20 +1,16 @@
 import 'package:faker/faker.dart';
 import 'package:surpraise_core/surpraise_core.dart';
 import 'package:surpraise_infra/src/contexts/communities/repositories/community_repository.dart';
+import 'package:surpraise_infra/src/datasources/datasources.dart';
 import 'package:test/test.dart';
 
-import '../../../../fake.dart';
+import '../../../../test_settings.dart';
 
 void main() {
   late CommunityRepository sut;
   group("Community Repository: ", () {
-    final CreateCommunityInput createCommunityInput = CreateCommunityInput(
-      description: faker.lorem.words(3).toString(),
-      ownerId: faker.guid.guid(),
-      title: faker.lorem.word(),
-      id: faker.guid.guid(),
-      imageUrl: faker.lorem.word(),
-    );
+    late final String userId;
+    late final CreateCommunityInput createCommunityInput;
 
     final newMembers = [
       MemberToAdd(
@@ -28,8 +24,18 @@ void main() {
     ];
 
     setUpAll(() async {
+      userId = (await supabaseClient()).auth.currentUser!.id;
+      createCommunityInput = CreateCommunityInput(
+        description: faker.lorem.words(3).toString(),
+        ownerId: userId,
+        title: faker.lorem.word(),
+        id: faker.guid.guid(),
+        imageUrl: faker.internet.httpsUrl(),
+      );
       sut = CommunityRepository(
-        databaseDatasource: FakeDatasource(),
+        databaseDatasource: SupabaseDatasource(
+          supabase: await supabaseClient(),
+        ),
       );
     });
 
@@ -59,20 +65,6 @@ void main() {
         expect(r.members, isNotEmpty);
         expect(r.members.length, equals(1));
       });
-    });
-    test("Sut should add new members to the community", () async {
-      final result = await sut.addMembers(
-        AddMembersInput(
-          idCommunity: createCommunityInput.id!,
-          members: newMembers,
-        ),
-      );
-
-      expect(result.isRight(), isTrue);
-      expect(
-        result.fold((l) => null, (r) => r),
-        isA<AddMembersOutput>(),
-      );
     });
 
     test("Sut should remove members", () async {

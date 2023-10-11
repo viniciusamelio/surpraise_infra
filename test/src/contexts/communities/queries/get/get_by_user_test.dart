@@ -133,16 +133,5 @@ Future<void> createAndAddMember(
   String ownerId,
   String memberId,
 ) async {
-  final id = await createCommunity(repository, ownerId);
-  await (repository as CommunityRepository).addMembers(
-    AddMembersInput(
-      idCommunity: id,
-      members: [
-        MemberToAdd(
-          idMember: memberId,
-          role: "member",
-        ),
-      ],
-    ),
-  );
+  await createCommunity(repository, ownerId);
 }

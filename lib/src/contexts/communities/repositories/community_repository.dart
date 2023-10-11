@@ -10,7 +10,6 @@ class CommunityRepository
     implements
         CreateCommunityRepository,
         FindCommunityRepository,
-        AddMembersRepository,
         RemoveMembersRepository,
         DeleteCommunityRepository {
   CommunityRepository({required DatabaseDatasource databaseDatasource})
@@ -83,50 +82,11 @@ class CommunityRepository
         return Left(Exception(result.errorMessage));
       } else if (result.data == null || result.multiData == null) {
         return Left(
-          Exception("Could not find community through given id"),
+          Exception("Could not find community with given id"),
         );
       }
       return Right(
         CommunityMapper.findOutputFromMap(result.data!),
-      );
-    } on Exception catch (e) {
-      return Left(e);
-    }
-  }
-
-  @override
-  Future<Either<Exception, AddMembersOutput>> addMembers(
-    AddMembersInput input,
-  ) async {
-    try {
-      final result = await _databaseDatasource.push(
-        PushQuery(
-          sourceName: sourceName,
-          value: input.members
-              .map(
-                (e) => CommunityMapper.addMemberFromInput(e),
-              )
-              .toList(),
-          id: input.idCommunity,
-          field: "members",
-        ),
-      );
-      for (final member in input.members) {
-        await _databaseDatasource.push(
-          PushQuery(
-            sourceName: "users",
-            value: input.idCommunity,
-            id: member.idMember,
-            field: "communities",
-          ),
-        );
-      }
-
-      if (result.failure) {
-        return Left(Exception(result.errorMessage));
-      }
-      return Right(
-        AddMembersOutput(),
       );
     } on Exception catch (e) {
       return Left(e);
