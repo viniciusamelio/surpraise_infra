@@ -1,6 +1,6 @@
 import 'package:faker/faker.dart';
-import 'package:mongo_dart/mongo_dart.dart';
 import 'package:surpraise_core/surpraise_core.dart';
+import 'package:surpraise_infra/src/contexts/collections.dart';
 import 'package:surpraise_infra/surpraise_infra.dart';
 import 'package:test/test.dart';
 
@@ -13,30 +13,22 @@ void main() {
   late PraiseInput input;
 
   setUpAll(() async {
-    id = faker.guid.guid();
-
-    final db = Db(
-      TestSettings.dbConnection,
-    );
-    await db.open();
-    final mongo = Mongo(
-      db,
-    );
-    datasource = MongoDatasource(
-      mongo,
-      TestSettings.dbConnection,
+    id = await supabaseClient().then((value) => value.auth.currentUser!.id);
+    datasource = SupabaseDatasource(
+      supabase: await supabaseClient(),
     );
 
-    final praisedId = faker.guid.guid();
+    final praisedId = "c80630d6-8c97-48b0-8c2e-524a191b887b";
 
     final CreateUserRepository userRepository = UserRepository(
-      databaseDatasource: MongoDatasource(
-        mongo,
-        TestSettings.dbConnection,
-      ),
+      databaseDatasource: datasource,
     );
 
-    await userRepository.create(
+    final CommunityRepository communityRepository = CommunityRepository(
+      databaseDatasource: datasource,
+    );
+
+    final newUser = await userRepository.create(
       CreateUserInput(
         tag: "@testingUser${faker.randomGenerator.integer(20)}",
         name: faker.lorem.word(),
@@ -45,11 +37,32 @@ void main() {
       ),
     );
 
+    final community = await communityRepository.createCommunity(
+      CreateCommunityInput(
+        description: faker.lorem.words(5).toString(),
+        ownerId: id,
+        title: faker.lorem.word(),
+        id: faker.guid.guid(),
+        imageUrl: faker.internet.httpsUrl(),
+      ),
+    );
+
+    await supabaseClient().then(
+      (client) async => client.from(communityMembersCollection).insert(
+        {
+          "community_id": community.fold((left) => null, (right) => right)!.id,
+          "active": true,
+          "role": "member",
+          "member_id": newUser.fold((left) => null, (right) => right)!.id,
+        },
+      ),
+    );
+
     input = PraiseInput(
-      commmunityId: faker.guid.guid(),
+      commmunityId: community.fold((left) => "", (right) => right.id),
       message: faker.lorem.words(6).toString(),
       praisedId: praisedId,
-      praiserId: faker.guid.guid(),
+      praiserId: id,
       topic: "#test",
     );
     input.id = id;
@@ -59,7 +72,7 @@ void main() {
   tearDownAll(() async {
     datasource.delete(
       GetQuery(
-        sourceName: "praises",
+        sourceName: praisesCollection,
         value: id,
         fieldName: "id",
       ),
