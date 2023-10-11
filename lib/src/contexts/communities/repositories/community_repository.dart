@@ -8,6 +8,7 @@ import 'package:surpraise_infra/src/datasources/database/query.dart';
 
 class CommunityRepository
     implements
+        LeaveCommunityRepository,
         CreateCommunityRepository,
         FindCommunityRepository,
         RemoveMembersRepository,
@@ -145,6 +146,66 @@ class CommunityRepository
           communityId: input.id,
         ),
       );
+    } on Exception catch (e) {
+      return Left(e);
+    }
+  }
+
+  @override
+  Future<Either<Exception, CommunityDetailsOutput>> getCommunityDetails(
+    String communityId,
+  ) async {
+    try {
+      final communityOrError = await _databaseDatasource.get(
+        GetQuery(
+          sourceName: communityMembersCollection,
+          value: communityId,
+          fieldName: "community_id",
+          select: "member_id, $communitiesCollection(owner_id)",
+        ),
+      );
+      if (communityOrError.failure) {
+        return Left(Exception("Something went wrong querying this community"));
+      } else if (communityOrError.data == null &&
+          (communityOrError.multiData == null ||
+              communityOrError.multiData!.isEmpty)) {
+        return Left(Exception("Community not found"));
+      }
+      return Right(
+        CommunityDetailsOutput(
+          membersCount: communityOrError.multiData!.length,
+          ownerId: communityOrError.multiData![0][communitiesCollection]
+              ["owner_id"],
+        ),
+      );
+    } on Exception catch (e) {
+      return Left(e);
+    }
+  }
+
+  @override
+  Future<Either<Exception, LeaveCommunityOutput>> leave(
+    LeaveCommunityInput input,
+  ) async {
+    try {
+      final leaveCommunityResponseOrError = await _databaseDatasource.delete(
+        GetQuery(
+          sourceName: communityMembersCollection,
+          value: input.communityId,
+          fieldName: "community_id",
+          filters: [
+            AggregateFilter.and(
+              operator: FilterOperator.equalsTo,
+              value: input.memberId,
+              fieldName: "member_id",
+            ),
+          ],
+        ),
+      );
+      if (leaveCommunityResponseOrError.failure) {
+        return Left(Exception("Something went wrong leaving community"));
+      }
+      return Right(LeaveCommunityOutput(input.communityId));
     } on Exception catch (e) {
       return Left(e);
     }
