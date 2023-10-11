@@ -1,39 +1,31 @@
 import 'package:faker/faker.dart';
-import 'package:mongo_dart/mongo_dart.dart';
+import 'package:supabase/supabase.dart';
 import 'package:surpraise_core/surpraise_core.dart';
 import 'package:surpraise_infra/src/contexts/users/repositories/user_repository.dart';
-import 'package:surpraise_infra/src/datasources/mongo/mongo_datasource.dart';
-import 'package:surpraise_infra/src/external/mongo/mongo.dart';
+import 'package:surpraise_infra/src/datasources/datasources.dart';
 import 'package:test/test.dart';
 
 import '../../../../test_settings.dart';
 
 void main() {
   late final UserRepository sut;
-
-  late final Db db;
+  late final SupabaseClient client;
 
   group("User Repository: ", () {
-    final input = CreateUserInput(
-      email: faker.internet.email(),
-      name: faker.person.firstName(),
-      tag: "@test_user",
-      id: faker.guid.guid(),
-    );
+    late final CreateUserInput input;
 
     setUpAll(() async {
-      db = await Db.create(TestSettings.dbConnection);
-      await db.open();
-      sut = UserRepository(
-        databaseDatasource: MongoDatasource(
-          Mongo(db),
-          TestSettings.dbConnection,
-        ),
+      client = await supabaseClient();
+      input = CreateUserInput(
+        email: faker.internet.email(),
+        name: faker.person.firstName(),
+        tag: "@${faker.internet.userName()}",
+        id: client.auth.currentSession!.user.id,
       );
-    });
-
-    tearDownAll(() async {
-      await db.collection(sut.sourceName).drop();
+      sut = UserRepository(
+          databaseDatasource: SupabaseDatasource(
+        supabase: client,
+      ));
     });
 
     test("sut should return saved user data", () async {
