@@ -1,3 +1,4 @@
+import 'package:surpraise_backend_dependencies/surpraise_backend_dependencies.dart';
 import 'package:surpraise_infra/src/query/query.dart';
 
 class GetUserQueryInput implements QueryInput {
@@ -7,9 +8,12 @@ class GetUserQueryInput implements QueryInput {
   final String id;
 }
 
-class GetUserByTagQueryInput implements QueryInput {
+class GetUserByTagQueryInput extends Equatable implements QueryInput {
   GetUserByTagQueryInput({
     required this.tag,
   });
   final String tag;
+
+  @override
+  List<Object?> get props => [tag];
 }
