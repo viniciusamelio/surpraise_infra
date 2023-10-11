@@ -1,40 +1,63 @@
 import 'package:faker/faker.dart';
-import 'package:mongo_dart/mongo_dart.dart';
 import 'package:surpraise_core/surpraise_core.dart';
+import 'package:surpraise_infra/src/contexts/collections.dart';
 import 'package:surpraise_infra/surpraise_infra.dart';
 import 'package:test/test.dart';
 
 import '../../../../../test_settings.dart';
+import '../../../../../test_utils.dart';
 
 void main() {
   late GetPraisesByCommunityQuery sut;
-
-  late Db db;
   late CreatePraiseRepository repository;
-
-  final String communityId = faker.guid.guid();
+  late final String communityId;
 
   group("GetPraisesByCommunityQuery: ", () {
+    setUpAll(() async {
+      final communityRepository = CommunityRepository(
+        databaseDatasource: SupabaseDatasource(
+          supabase: await supabaseClient(),
+        ),
+      );
+      final community = await communityRepository.createCommunity(
+        CreateCommunityInput(
+          description: faker.lorem.words(5).toString(),
+          ownerId: await supabaseClient().then(
+            (client) => client.auth.currentUser!.id,
+          ),
+          title: faker.lorem.word(),
+          id: faker.guid.guid(),
+          imageUrl: faker.lorem.word(),
+        ),
+      );
+      communityId = community.fold((left) => "", (right) => right.id);
+      await addCommunityMember(communityId: communityId, userId: fakeUserId);
+    });
     setUp(() async {
-      db = await Db.create(TestSettings.dbConnection);
-      final mongo = Mongo(db);
-      await db.open();
       sut = GetPraisesByCommunityQuery(
-        databaseDatasource: MongoDatasource(mongo, TestSettings.dbConnection),
+        databaseDatasource: SupabaseDatasource(
+          supabase: await supabaseClient(),
+        ),
       );
       repository = PraiseRepository(
-        datasource: MongoDatasource(mongo, TestSettings.dbConnection),
+        datasource: SupabaseDatasource(
+          supabase: await supabaseClient(),
+        ),
       );
     });
 
     tearDownAll(() async {
-      await db.collection("praises").drop();
+      await supabaseClient().then(
+        (client) async => await client.from(praisesCollection).delete().neq(
+              "id",
+              faker.guid.guid(),
+            ),
+      );
     });
 
     test("sut should retrieve all praises from a given community", () async {
       await createPraise(repository, communityId);
       await createPraise(repository, communityId);
-      await createPraise(repository, faker.guid.guid());
 
       final praisesOrError = await sut(
         GetPraisesByCommunityInput(
@@ -48,53 +71,34 @@ void main() {
       });
     });
 
-    test("sut should retrieve no praises from a dataless community ", () async {
+    test("sut should retrieve limited praises from a given community",
+        () async {
+      await createPraise(repository, communityId);
+      await createPraise(repository, communityId);
+
+      final praisesOrError = await sut(
+        GetPraisesByCommunityInput(
+          id: communityId,
+          limit: 2,
+          offset: 2,
+        ),
+      );
+
+      expect(praisesOrError.isRight(), isTrue);
+      praisesOrError.fold((l) => null, (r) {
+        expect(r.value.length, equals(2));
+      });
+    });
+
+    test("sut should retrieve no praises from an unexisting community",
+        () async {
       final praisesOrError = await sut(
         GetPraisesByCommunityInput(
           id: "aRandomNotUsedId",
         ),
       );
 
-      expect(praisesOrError.isRight(), isTrue);
-      praisesOrError.fold((l) => null, (r) {
-        expect(r.value, isEmpty);
-      });
+      expect(praisesOrError.isLeft(), isTrue);
     });
   });
-}
-
-Future<void> createPraise(
-  CreatePraiseRepository repository,
-  String communityId,
-) async {
-  final db = Db(TestSettings.dbConnection);
-  await db.open();
-
-  final mongo = Mongo(db);
-  final CreateUserRepository userRepository = UserRepository(
-    databaseDatasource: MongoDatasource(
-      mongo,
-      TestSettings.dbConnection,
-    ),
-  );
-
-  final praisedId = faker.guid.guid();
-  await userRepository.create(
-    CreateUserInput(
-      id: praisedId,
-      tag: "@testingUser${faker.randomGenerator.integer(20)}",
-      name: faker.lorem.word(),
-      email: faker.internet.email(),
-    ),
-  );
-
-  await repository.create(
-    PraiseInput(
-      commmunityId: communityId,
-      message: faker.lorem.words(7).toString(),
-      praisedId: praisedId,
-      praiserId: faker.guid.guid(),
-      topic: "#kind",
-    )..id = faker.guid.guid(),
-  );
 }

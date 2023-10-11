@@ -1,4 +1,3 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:surpraise_infra/src/query/query.dart';
 
 class GetPraisesByUserInput implements QueryInput {
@@ -14,9 +13,13 @@ class GetPraisesByUserInput implements QueryInput {
 class GetPraisesByCommunityInput implements QueryInput {
   GetPraisesByCommunityInput({
     required this.id,
+    this.limit = 20,
+    this.offset = 0,
   });
 
   final String id;
+  final int limit;
+  final int offset;
 }
 
 class GetPraiseInput implements QueryInput {

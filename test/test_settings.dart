@@ -7,6 +7,7 @@ abstract class TestSettings {
 const supabaseUrl = 'http://localhost:8000';
 const supabaseKey =
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB5aWt2c2R1ZXRmYWt0cm53d2N1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTY5ODQ0MTEsImV4cCI6MjAxMjU2MDQxMX0.AhBw4GTJjindZLDQMF49qmLeAWmAFpAU9hmv1DwrEHI";
+const fakeUserId = "c80630d6-8c97-48b0-8c2e-524a191b887b";
 
 Future<SupabaseClient> supabaseClient() async {
   final client = SupabaseClient(supabaseUrl, supabaseKey);

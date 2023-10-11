@@ -18,7 +18,7 @@ void main() {
       supabase: await supabaseClient(),
     );
 
-    final praisedId = "c80630d6-8c97-48b0-8c2e-524a191b887b";
+    final praisedId = fakeUserId;
 
     final CreateUserRepository userRepository = UserRepository(
       databaseDatasource: datasource,

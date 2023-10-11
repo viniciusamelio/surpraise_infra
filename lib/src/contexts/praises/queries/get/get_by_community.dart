@@ -1,3 +1,5 @@
+import 'package:surpraise_infra/src/contexts/collections.dart';
+
 import 'input.dart';
 import 'output.dart';
 
@@ -21,25 +23,27 @@ class GetPraisesByCommunityQuery
   ) async {
     final praisesOrError = await databaseDatasource.get(
       GetQuery(
-        sourceName: "praises",
+        sourceName: praisesCollection,
         operator: FilterOperator.equalsTo,
         value: input.id,
         fieldName: "community_id",
-        singleResult: false,
+        limit: input.limit,
+        offset: input.offset,
       ),
     );
 
     if (praisesOrError.failure) {
-      if (praisesOrError.errorMessage!.contains("No element")) {
-        return Left(
-          QueryError(
-            "User not found",
-            404,
-          ),
-        );
-      }
       return Left(
         QueryError(praisesOrError.errorMessage!),
+      );
+    } else if (praisesOrError.data == null &&
+        (praisesOrError.multiData == null ||
+            praisesOrError.multiData!.isEmpty)) {
+      return Left(
+        QueryError(
+          "User not found",
+          404,
+        ),
       );
     }
 
