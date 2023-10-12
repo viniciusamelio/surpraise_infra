@@ -25,34 +25,38 @@ class CommunityRepository
     CreateCommunityInput input,
   ) async {
     try {
-      final result = await _databaseDatasource.save(
+      final community = await _databaseDatasource.save(
         SaveQuery(
-          sourceName: sourceName,
-          value: CommunityMapper.createMapFromInput(input),
+          sourceName: communitiesCollection,
+          value: {
+            "owner_id": input.ownerId,
+            "imageUrl": input.imageUrl,
+            "description": input.description,
+            "title": input.title,
+          },
         ),
       );
+
       await _databaseDatasource.save(
         SaveQuery(
           sourceName: communityMembersCollection,
           value: {
             "member_id": input.ownerId,
-            "community_id": result.multiData![0]["id"],
+            "community_id": community.multiData![0]["id"],
             "role": "owner",
           },
         ),
       );
-      if (result.failure) {
-        return Left(Exception(result.errorMessage));
-      }
+
       return Right(
         CreateCommunityOutput(
-          id: result.multiData![0]["id"],
-          description: result.multiData![0]["description"],
-          title: result.multiData![0]["title"],
+          id: community.multiData![0]["id"],
+          description: community.multiData![0]["description"],
+          title: community.multiData![0]["title"],
           members: [
             {
               "member_id": input.ownerId,
-              "community_id": result.multiData![0]["id"],
+              "community_id": community.multiData![0]["id"],
               "role": "owner",
             },
           ],
