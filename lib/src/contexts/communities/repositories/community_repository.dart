@@ -12,7 +12,8 @@ class CommunityRepository
         CreateCommunityRepository,
         FindCommunityRepository,
         RemoveMembersRepository,
-        DeleteCommunityRepository {
+        DeleteCommunityRepository,
+        UpdateCommunityRepository {
   CommunityRepository({required DatabaseDatasource databaseDatasource})
       : _databaseDatasource = databaseDatasource;
 
@@ -213,5 +214,37 @@ class CommunityRepository
     } on Exception catch (e) {
       return Left(e);
     }
+  }
+
+  @override
+  Future<Either<Exception, UpdateCommunityOutput>> update(
+    UpdateCommunityInput input,
+  ) async {
+    final updatedCommunityOrError = await _databaseDatasource.save(
+      SaveQuery(
+        sourceName: communitiesCollection,
+        value: {
+          "imageUrl": input.imageUrl,
+          "description": input.description,
+          "title": input.title,
+        },
+        id: input.id,
+      ),
+    );
+
+    if (updatedCommunityOrError.failure) {
+      return Left(
+        Exception("Something went wrong updating community"),
+      );
+    }
+
+    return Right(
+      UpdateCommunityOutput(
+        id: updatedCommunityOrError.multiData![0]["id"],
+        description: updatedCommunityOrError.multiData![0]["description"],
+        title: updatedCommunityOrError.multiData![0]["title"],
+        imageUrl: input.imageUrl,
+      ),
+    );
   }
 }
