@@ -5,6 +5,23 @@ import 'package:surpraise_infra/surpraise_infra.dart';
 
 import 'test_settings.dart';
 
+Future<void> inviteMember({
+  required String role,
+  required String communityId,
+  required String memberId,
+}) async {
+  await supabaseClient().then(
+    (client) async => client.from(invitesCollection).insert(
+      {
+        "community_id": communityId,
+        "role": "member",
+        "member_id": memberId,
+        "status": "pending",
+      },
+    ),
+  );
+}
+
 Future<void> addCommunityMember({
   required String communityId,
   required String userId,

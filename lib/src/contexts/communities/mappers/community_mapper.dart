@@ -28,12 +28,14 @@ abstract class CommunityMapper {
         role: map["role"],
       );
 
-  static FindCommunityOutput findOutputFromMap(Map<String, dynamic> map) =>
+  static FindCommunityOutput findOutputFromMap(
+          Map<String, dynamic> map, List<FindCommunityInviteDto>? invites) =>
       FindCommunityOutput(
         id: map["id"],
         ownerId: map["owner_id"],
         description: map["description"],
         title: map["title"],
+        invites: invites ?? [],
         members: (map[communityMembersCollection] as List).map((e) {
           if (!e.containsKey("community_id")) {
             e["community_id"] = map["id"];

@@ -26,15 +26,19 @@ class CommunityRepository
     CreateCommunityInput input,
   ) async {
     try {
+      final data = {
+        "owner_id": input.ownerId,
+        "imageUrl": input.imageUrl,
+        "description": input.description,
+        "title": input.title,
+      };
+      if (input.id != null) {
+        data["id"] = input.id!;
+      }
       final community = await _databaseDatasource.save(
         SaveQuery(
           sourceName: communitiesCollection,
-          value: {
-            "owner_id": input.ownerId,
-            "imageUrl": input.imageUrl,
-            "description": input.description,
-            "title": input.title,
-          },
+          value: data,
         ),
       );
 
@@ -74,6 +78,7 @@ class CommunityRepository
     FindCommunityInput input,
   ) async {
     try {
+      final List<FindCommunityInviteDto> invites = [];
       final result = await _databaseDatasource.get(
         GetQuery(
           sourceName: sourceName,
@@ -91,8 +96,44 @@ class CommunityRepository
           Exception("Could not find community with given id"),
         );
       }
+      if (input.withInvites) {
+        final invitesOrError = await _databaseDatasource.get(
+          GetQuery(
+            sourceName: invitesCollection,
+            value: input.id,
+            fieldName: "community_id",
+            filters: [
+              AndFilter(
+                fieldName: "status",
+                operator: FilterOperator.equalsTo,
+                value: "pending",
+              ),
+            ],
+          ),
+        );
+        if (invitesOrError.failure) {
+          return Left(
+            Exception(
+              "Something went wrong getting invites for this community",
+            ),
+          );
+        }
+
+        invites.addAll((invitesOrError.multiData ?? [])
+            .map(
+              (e) => FindCommunityInviteDto(
+                id: e["id"],
+                memberId: e["member_id"],
+                role: e["role"],
+              ),
+            )
+            .toList());
+      }
       return Right(
-        CommunityMapper.findOutputFromMap(result.data!),
+        CommunityMapper.findOutputFromMap(
+          result.data!,
+          invites,
+        ),
       );
     } on Exception catch (e) {
       return Left(e);
