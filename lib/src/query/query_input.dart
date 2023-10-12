@@ -1,1 +1,3 @@
-abstract class QueryInput {}
+abstract class QueryInput {
+  const QueryInput();
+}

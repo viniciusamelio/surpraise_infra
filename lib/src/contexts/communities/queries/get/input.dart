@@ -1,7 +1,8 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:surpraise_infra/src/query/query.dart';
 
 class GetCommunitiesByUserInput implements QueryInput {
-  GetCommunitiesByUserInput({
+  const GetCommunitiesByUserInput({
     required this.id,
     this.limit = 20,
     this.offset = 0,
@@ -13,9 +14,16 @@ class GetCommunitiesByUserInput implements QueryInput {
 }
 
 class GetCommunityInput implements QueryInput {
-  GetCommunityInput({
+  const GetCommunityInput({
     required this.id,
   });
 
   final String id;
+}
+
+class GetMembersInput extends QueryInput {
+  final String communityId;
+  const GetMembersInput({
+    required this.communityId,
+  });
 }
