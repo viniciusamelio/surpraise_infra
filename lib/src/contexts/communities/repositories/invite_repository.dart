@@ -125,7 +125,7 @@ class InvitationRepository implements InviteRepository, AnswerInviteRepository {
           communityId: inviteOrError.multiData!.first["community_id"],
           status: inviteOrError.multiData!.first["status"],
           role: inviteOrError.multiData!.first["role"],
-          memberId: inviteOrError.multiData!.first["member_di"],
+          memberId: inviteOrError.multiData!.first["member_id"],
         ),
       );
     } on Exception catch (e) {
