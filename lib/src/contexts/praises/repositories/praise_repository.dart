@@ -57,8 +57,16 @@ class PraiseRepository
           Exception(result.errorMessage),
         );
       }
+
       return Right(
-        PraiseOutput(),
+        PraiseOutput(
+          {
+            "praised": praised.multiData![0],
+            "praiser": praiser.multiData![0],
+            "message": input.message,
+            "topic": input.topic,
+          },
+        ),
       );
     } on Exception catch (e) {
       return Left(e);
