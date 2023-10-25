@@ -6,6 +6,7 @@ abstract class PraiseMapper {
         "praised_id": input.praisedId,
         "praiser_id": input.praiserId,
         "message": input.message,
+        "private": input.private,
         "community_id": input.commmunityId,
         "topic": input.topic,
         "created_at": DateTime.now().toIso8601String(),
