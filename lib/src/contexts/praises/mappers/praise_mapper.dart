@@ -10,5 +10,6 @@ abstract class PraiseMapper {
         "community_id": input.commmunityId,
         "topic": input.topic,
         "created_at": DateTime.now().toIso8601String(),
+        "extra_praiseds": input.extraPraisedIds
       };
 }

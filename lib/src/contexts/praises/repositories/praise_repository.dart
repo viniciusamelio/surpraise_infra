@@ -52,6 +52,18 @@ class PraiseRepository
           value: rawPraiseData,
         ),
       );
+
+      for (final extraPraised in input.extraPraisedIds) {
+        await _datasource.save(
+          SaveQuery(
+            sourceName: sharedPraisesCollection,
+            value: {
+              "praise_id": result.data!["id"],
+              "praised_id": extraPraised,
+            },
+          ),
+        );
+      }
       if (result.failure) {
         return Left(
           Exception(result.errorMessage),
