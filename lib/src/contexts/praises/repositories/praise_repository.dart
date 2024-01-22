@@ -58,7 +58,7 @@ class PraiseRepository
           SaveQuery(
             sourceName: sharedPraisesCollection,
             value: {
-              "praise_id": result.data!["id"],
+              "praise_id": rawPraiseData["id"],
               "praised_id": extraPraised,
             },
           ),
